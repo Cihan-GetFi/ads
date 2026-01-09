@@ -1083,17 +1083,19 @@
         const Player = {
             gridX: 4,
             gridY: 3,
-            direction: { x: 0, y: 1 },
+            direction: { x: 0, y: -1 }, // CHANGED: Start moving DOWN
+            rotation: 0, // NEW: Rolling animation
             scale: 1,
             squashTime: 0,
             trailTimer: 0,
-            deathAnimation: 0, // 0 = alive, 0-1 = death animation progress
+            deathAnimation: 0,
             deathFragments: [],
 
             init() {
                 this.gridX = CFG.PLAYER_START.x;
                 this.gridY = CFG.PLAYER_START.y;
-                this.direction = { x: 0, y: 1 };
+                this.direction = { x: 0, y: -1 }; // CHANGED: Move down by default
+                this.rotation = 0;
                 this.scale = 1;
                 this.trailTimer = 0;
                 this.deathAnimation = 0;
@@ -1102,8 +1104,8 @@
 
             setDirection(dir) {
                 const dirs = {
-                    'UP': { x: 0, y: 1 },
-                    'DOWN': { x: 0, y: -1 },
+                    'UP': { x: 0, y: -1 },    // REVERSED: UP = move down (map scrolls down)
+                    'DOWN': { x: 0, y: 1 },   // REVERSED: DOWN = move up
                     'LEFT': { x: -1, y: 0 },
                     'RIGHT': { x: 1, y: 0 }
                 };
@@ -1153,6 +1155,13 @@
                 this.gridY += this.direction.y * speed;
 
                 this.gridX = Math.max(0.5, Math.min(CFG.GRID_WIDTH - 0.5, this.gridX));
+
+                // 🎾 ROLLING ANIMATION - Ball rotates as it moves
+                const moveSpeed = Math.sqrt(
+                    this.direction.x * this.direction.x +
+                    this.direction.y * this.direction.y
+                ) * speed;
+                this.rotation += moveSpeed * 8; // Rotation speed based on movement
 
                 if (this.squashTime > 0) {
                     this.squashTime = Math.max(0, this.squashTime - dt);
@@ -1215,9 +1224,10 @@
             update(dt) {
                 if (Game.state !== 'playing') return;
 
-                const targetY = Player.gridY - 5;
+                // 🎬 AUTO-SCROLL DOWN - Map scrolls downward automatically
+                const targetY = Player.gridY + 5; // CHANGED: Look ahead DOWN
                 this.y += (targetY - this.y) * 0.1;
-                this.y += CFG.CAMERA_SPEED * dt;
+                this.y -= CFG.CAMERA_SPEED * dt; // CHANGED: Scroll DOWN (negative)
 
                 if (this.shakeAmount > 0) {
                     this.shakeAmount *= 0.86;
@@ -2036,6 +2046,7 @@
 
                 ctx.save();
                 ctx.translate(drawX, drawY);
+                ctx.rotate(Player.rotation); // 🎾 ROLLING ANIMATION
                 ctx.scale(scaleX, scaleY);
 
                 ctx.shadowColor = '#00d4ff';
