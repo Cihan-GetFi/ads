@@ -412,8 +412,8 @@
             CELL_SIZE: 80,
             GRID_WIDTH: 9,
             PLAYER_START: { x: 4, y: 3 },
-            PLAYER_SPEED: 0.3, // VERY SLOW: Ultra precise control
-            CAMERA_SPEED: 0.4, // SLOW SCROLL: Balanced with player speed
+            PLAYER_SPEED: 0.15, // CRAWL SPEED: Extremely slow movement
+            CAMERA_SPEED: 0.2, // MINIMAL SCROLL: Very slow background movement
             SWIPE_THRESHOLD: 25,
             GAME_DURATION: 15000,
             TUTORIAL_FADE_SPEED: 2,
@@ -1215,24 +1215,27 @@
                 const maxY = centerY + 2;      // Can move down (draws higher on screen)
                 this.gridY = Math.max(minY, Math.min(maxY, this.gridY));
 
-                // 🎾 ROLLING ANIMATION - Ball rotates as it moves (VERY SLOW)
+                // 🎾 ROLLING ANIMATION - Ball rotates as it moves (MINIMAL)
                 const moveSpeed = Math.sqrt(
                     this.direction.x * this.direction.x +
                     this.direction.y * this.direction.y
                 ) * speed;
-                this.rotation += moveSpeed * 1; // Minimal rotation for slow visual perception
+                this.rotation += moveSpeed * 0.3; // Almost no rotation for minimal visual speed
 
                 if (this.squashTime > 0) {
                     this.squashTime = Math.max(0, this.squashTime - dt);
                 }
 
+                // TRAIL DISABLED for minimal visual speed perception
+                /*
                 this.trailTimer += dt;
-                if (this.trailTimer > 0.1) { // SLOWER TRAIL: Less visual "speed lines"
+                if (this.trailTimer > 0.1) {
                     const pos = this.getWorldPos();
                     const camOffset = Camera.getOffset();
                     TrailSystem.add(pos.x, CFG.HEIGHT - (pos.y - camOffset.y));
                     this.trailTimer = 0;
                 }
+                */
             },
 
             startDeathAnimation() {
