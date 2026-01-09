@@ -1411,62 +1411,124 @@
             },
 
             draw(ctx) {
-                // Modern HUD panel
+                // 💎 PREMIUM GLASSMORPHISM HUD
                 ctx.save();
 
-                // Score panel background
-                const panelGradient = ctx.createLinearGradient(0, 20, 0, 100);
-                panelGradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
-                panelGradient.addColorStop(1, 'rgba(0, 0, 0, 0.3)');
+                // 🎨 GLASSMORPHISM SCORE PANEL
+                const panelX = 25;
+                const panelY = 25;
+                const panelW = 180;
+                const panelH = 85;
+                const panelRadius = 20;
 
-                ctx.fillStyle = panelGradient;
-                ctx.shadowBlur = 8;
-                ctx.shadowColor = 'rgba(0, 255, 136, 0.3)';
+                // Frosted glass backdrop (simulated)
+                const backdropGrad = ctx.createLinearGradient(panelX, panelY, panelX, panelY + panelH);
+                backdropGrad.addColorStop(0, 'rgba(255, 255, 255, 0.15)');
+                backdropGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.10)');
+                backdropGrad.addColorStop(1, 'rgba(255, 255, 255, 0.05)');
+
+                ctx.fillStyle = backdropGrad;
+                ctx.shadowBlur = 25;
+                ctx.shadowColor = 'rgba(0, 255, 136, 0.4)';
                 ctx.beginPath();
-                ctx.roundRect(20, 20, 140, 70, 15);
+                ctx.roundRect(panelX, panelY, panelW, panelH, panelRadius);
                 ctx.fill();
-
-                // Score
-                ctx.shadowBlur = 8;
-                ctx.shadowColor = 'rgba(0, 255, 136, 0.8)';
-                ctx.fillStyle = '#00ff88';
-                ctx.font = 'bold 42px Arial';
-                ctx.textAlign = 'left';
-                ctx.fillText(Game.score.toString(), 35, 62);
-
-                // Coin icon
-                const iconSize = 38;
                 ctx.shadowBlur = 0;
-                ctx.drawImage(SpriteCache.coin, 95, 40, iconSize, iconSize);
+
+                // Glass border (bright edge)
+                const borderGrad = ctx.createLinearGradient(panelX, panelY, panelX, panelY + panelH);
+                borderGrad.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
+                borderGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.2)');
+                borderGrad.addColorStop(1, 'rgba(255, 255, 255, 0.1)');
+
+                ctx.strokeStyle = borderGrad;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.roundRect(panelX, panelY, panelW, panelH, panelRadius);
+                ctx.stroke();
+
+                // Inner glow
+                ctx.strokeStyle = 'rgba(0, 255, 136, 0.3)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.roundRect(panelX + 2, panelY + 2, panelW - 4, panelH - 4, panelRadius - 2);
+                ctx.stroke();
+
+                // Score text with premium styling
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = 'rgba(0, 255, 136, 0.9)';
+                ctx.fillStyle = '#00ff88';
+                ctx.font = '900 52px Arial';
+                ctx.textAlign = 'left';
+                ctx.fillText(Game.score.toString(), panelX + 20, panelY + 60);
+
+                // Coin icon with glow
+                const iconSize = 42;
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = '#ffd700';
+                ctx.drawImage(SpriteCache.coin, panelX + panelW - iconSize - 18, panelY + 22, iconSize, iconSize);
+                ctx.shadowBlur = 0;
+
                 ctx.restore();
 
-                // Modern progress bar
+                // 💎 PREMIUM GLASSMORPHISM PROGRESS BAR
                 const progress = Math.max(0, (CFG.GAME_DURATION - Game.elapsed) / CFG.GAME_DURATION);
-                const barX = 20;
-                const barY = 100;
-                const barW = CFG.WIDTH - 40;
-                const barH = 12;
+                const barX = 25;
+                const barY = 125;
+                const barW = CFG.WIDTH - 50;
+                const barH = 16;
+                const barRadius = 10;
 
-                // Bar background
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-                ctx.shadowBlur = 0;
+                // Glass container
+                const barBgGrad = ctx.createLinearGradient(barX, barY, barX, barY + barH);
+                barBgGrad.addColorStop(0, 'rgba(255, 255, 255, 0.12)');
+                barBgGrad.addColorStop(1, 'rgba(255, 255, 255, 0.05)');
+
+                ctx.fillStyle = barBgGrad;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
                 ctx.beginPath();
-                ctx.roundRect(barX, barY, barW, barH, 6);
-                ctx.fill();
-
-                // Bar fill with gradient
-                const barGradient = ctx.createLinearGradient(barX, 0, barX + barW * progress, 0);
-                barGradient.addColorStop(0, '#00ff88');
-                barGradient.addColorStop(0.5, '#00d4ff');
-                barGradient.addColorStop(1, '#a855f7');
-
-                ctx.fillStyle = barGradient;
-                ctx.shadowBlur = 8;
-                ctx.shadowColor = 'rgba(0, 255, 136, 0.7)';
-                ctx.beginPath();
-                ctx.roundRect(barX, barY, barW * progress, barH, 6);
+                ctx.roundRect(barX, barY, barW, barH, barRadius);
                 ctx.fill();
                 ctx.shadowBlur = 0;
+
+                // Glass border
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.roundRect(barX, barY, barW, barH, barRadius);
+                ctx.stroke();
+
+                // Progress fill with animated gradient
+                const time = performance.now() / 1000;
+                const animOffset = (time % 2) * barW;
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.roundRect(barX + 2, barY + 2, barW - 4, barH - 4, barRadius - 2);
+                ctx.clip();
+
+                const progressGrad = ctx.createLinearGradient(barX + animOffset, 0, barX + animOffset + barW, 0);
+                progressGrad.addColorStop(0, '#00ff88');
+                progressGrad.addColorStop(0.25, '#00d4ff');
+                progressGrad.addColorStop(0.5, '#a855f7');
+                progressGrad.addColorStop(0.75, '#00d4ff');
+                progressGrad.addColorStop(1, '#00ff88');
+
+                ctx.fillStyle = progressGrad;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = 'rgba(0, 255, 136, 0.8)';
+                ctx.fillRect(barX + 2, barY + 2, (barW - 4) * progress, barH - 4);
+                ctx.shadowBlur = 0;
+
+                // Progress shine overlay
+                const shineGrad = ctx.createLinearGradient(barX, barY, barX, barY + barH / 2);
+                shineGrad.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
+                shineGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                ctx.fillStyle = shineGrad;
+                ctx.fillRect(barX + 2, barY + 2, (barW - 4) * progress, (barH - 4) / 2);
+
+                ctx.restore();
 
                 // Coin FX with enhanced glow
                 this.coinFX.forEach(fx => {
@@ -1706,178 +1768,185 @@
                     const h = wall.h * CFG.CELL_SIZE;
                     const drawY = CFG.HEIGHT - (y - camOffset.y);
 
-                    // 🧱 ULTRA PREMIUM TEXTURED WALLS - Photorealistic brick/concrete
-                    const depthOffset = 12; // Increased depth
-                    const numLayers = 4; // More layers for better 3D
+                    // 🎮 TRUE ISOMETRIC 3D CUBE - Each wall is a real 3D box
+                    const depth = 35; // 3D depth
+                    const isoX = depth * 0.866; // cos(30°) * depth
+                    const isoY = depth * 0.5;   // sin(30°) * depth
 
-                    // Shadow/depth layers (drawn back to front)
-                    for (let i = numLayers - 1; i >= 0; i--) {
-                        const layerDepth = i * depthOffset;
-                        const layerAlpha = 0.2 + (i / (numLayers - 1)) * 0.8;
+                    ctx.save();
 
-                        ctx.save();
-                        ctx.globalAlpha = layerAlpha;
+                    // 📦 STEP 1: DRAW RIGHT SIDE FACE (darkest)
+                    ctx.beginPath();
+                    const rightX1 = x + w / 2;
+                    const rightY1 = drawY - h;
+                    ctx.moveTo(rightX1, rightY1);
+                    ctx.lineTo(rightX1 + isoX, rightY1 - isoY);
+                    ctx.lineTo(rightX1 + isoX, drawY - isoY);
+                    ctx.lineTo(rightX1, drawY);
+                    ctx.closePath();
 
-                        const wallX = x - w / 2 + 5 + layerDepth;
-                        const wallY = drawY - h + 5 + layerDepth;
-                        const wallW = w - 10;
-                        const wallH = h - 10;
+                    // Right side gradient (darker, it's in shadow)
+                    const rightGrad = ctx.createLinearGradient(rightX1, rightY1, rightX1 + isoX, rightY1);
+                    rightGrad.addColorStop(0, CFG.COLORS.WALL[2]); // Darkest
+                    rightGrad.addColorStop(0.5, '#8b1530');
+                    rightGrad.addColorStop(1, '#6b0f20');
+                    ctx.fillStyle = rightGrad;
+                    ctx.fill();
 
-                        // Layer shadow (deeper shadow for back layers)
-                        if (i > 0) {
-                            const shadowGrad = ctx.createLinearGradient(wallX, wallY, wallX + wallW, wallY + wallH);
-                            shadowGrad.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
-                            shadowGrad.addColorStop(0.5, 'rgba(0, 0, 0, 0.4)');
-                            shadowGrad.addColorStop(1, 'rgba(0, 0, 0, 0.3)');
-                            ctx.fillStyle = shadowGrad;
+                    // Right side texture overlay
+                    for (let ty = 0; ty < h; ty += 8) {
+                        const noiseVal = TextureGen.noise2D(wall.x * 10, (wall.y + ty / h) * 10, 42);
+                        if (noiseVal > 0.5) {
+                            ctx.fillStyle = `rgba(0, 0, 0, ${0.15 * (noiseVal - 0.5)})`;
+                            const py1 = rightY1 + ty;
+                            const py2 = py1 + 8;
                             ctx.beginPath();
-                            ctx.roundRect(wallX, wallY, wallW, wallH, 12);
+                            ctx.moveTo(rightX1, py1);
+                            ctx.lineTo(rightX1 + isoX, py1 - isoY);
+                            ctx.lineTo(rightX1 + isoX, py2 - isoY);
+                            ctx.lineTo(rightX1, py2);
+                            ctx.closePath();
                             ctx.fill();
                         }
-
-                        // 🎨 PREMIUM GRADIENT with better color transition
-                        const wallGradient = ctx.createLinearGradient(wallX, wallY, wallX, wallY + wallH);
-                        wallGradient.addColorStop(0, CFG.COLORS.WALL[2]); // Dark top
-                        wallGradient.addColorStop(0.15, CFG.COLORS.WALL[1]); // Mid
-                        wallGradient.addColorStop(0.4, CFG.COLORS.WALL[0]); // Bright middle
-                        wallGradient.addColorStop(0.7, CFG.COLORS.WALL[1]); // Mid
-                        wallGradient.addColorStop(1, CFG.COLORS.WALL[2]); // Dark bottom
-
-                        ctx.fillStyle = wallGradient;
-                        ctx.shadowBlur = i === 0 ? 25 : 0;
-                        ctx.shadowColor = 'rgba(255, 51, 102, 0.9)';
-                        ctx.beginPath();
-                        ctx.roundRect(wallX, wallY, wallW, wallH, 12);
-                        ctx.fill();
-                        ctx.shadowBlur = 0;
-
-                        // 🧱 BRICK/CONCRETE TEXTURE (only on front layer for performance)
-                        if (i === 0) {
-                            // Create temporary canvas for texture
-                            const texCanvas = document.createElement('canvas');
-                            texCanvas.width = wallW;
-                            texCanvas.height = wallH;
-                            const texCtx = texCanvas.getContext('2d');
-
-                            // Generate procedural brick/concrete texture
-                            const texData = texCtx.createImageData(wallW, wallH);
-                            const pixels = texData.data;
-
-                            for (let py = 0; py < wallH; py++) {
-                                for (let px = 0; px < wallW; px++) {
-                                    const idx = (py * wallW + px) * 4;
-
-                                    // Fractal noise for concrete texture
-                                    const noise = TextureGen.fractalNoise(
-                                        (wallX + px) / 50,
-                                        (wallY + py) / 50,
-                                        4, 0.5, 3, wall.x * 17 + wall.y * 31
-                                    );
-
-                                    // Brick pattern
-                                    const brickHeight = 20;
-                                    const brickWidth = 45;
-                                    const mortarSize = 3;
-
-                                    const row = Math.floor(py / brickHeight);
-                                    const col = Math.floor((px + (row % 2) * (brickWidth / 2)) / brickWidth);
-
-                                    const brickX = px % brickWidth;
-                                    const brickY = py % brickHeight;
-
-                                    // Mortar lines (darker)
-                                    const isMortar = brickX < mortarSize || brickY < mortarSize;
-
-                                    // Texture intensity (darker in mortar, varied in brick)
-                                    let textureValue = isMortar ?
-                                        -40 + noise * 20 :
-                                        (noise - 0.5) * 60;
-
-                                    // Edge wear/damage
-                                    const edgeNoise = TextureGen.noise2D(px / 10, py / 10, wall.y * 13);
-                                    if ((brickX < 5 || brickY < 5) && edgeNoise > 0.7) {
-                                        textureValue -= 30; // Darker edges
-                                    }
-
-                                    // Apply texture to alpha channel (for overlay)
-                                    pixels[idx] = 0;
-                                    pixels[idx + 1] = 0;
-                                    pixels[idx + 2] = 0;
-                                    pixels[idx + 3] = Math.abs(textureValue);
-                                }
-                            }
-
-                            texCtx.putImageData(texData, 0, 0);
-
-                            // Apply texture overlay
-                            ctx.globalCompositeOperation = 'overlay';
-                            ctx.globalAlpha = 0.4;
-                            ctx.drawImage(texCanvas, wallX, wallY);
-                            ctx.globalCompositeOperation = 'source-over';
-                            ctx.globalAlpha = layerAlpha;
-                        }
-
-                        // Top highlight (3D edge)
-                        if (i === 0) {
-                            const topHighlight = ctx.createLinearGradient(
-                                x, drawY - h + 10,
-                                x, drawY - h + 25
-                            );
-                            topHighlight.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
-                            topHighlight.addColorStop(1, 'rgba(255, 255, 255, 0)');
-
-                            ctx.fillStyle = topHighlight;
-                            ctx.beginPath();
-                            ctx.roundRect(
-                                x - w / 2 + 12,
-                                drawY - h + 12,
-                                w - 24,
-                                15,
-                                8
-                            );
-                            ctx.fill();
-
-                            // Side edge highlight (left side)
-                            const leftEdge = ctx.createLinearGradient(
-                                x - w / 2 + 10, drawY,
-                                x - w / 2 + 20, drawY
-                            );
-                            leftEdge.addColorStop(0, 'rgba(255, 100, 130, 0.5)');
-                            leftEdge.addColorStop(1, 'rgba(255, 100, 130, 0)');
-
-                            ctx.fillStyle = leftEdge;
-                            ctx.beginPath();
-                            ctx.roundRect(
-                                x - w / 2 + 10,
-                                drawY - h + 15,
-                                10,
-                                h - 20,
-                                5
-                            );
-                            ctx.fill();
-
-                            // Side edge shadow (right side)
-                            const rightEdge = ctx.createLinearGradient(
-                                x + w / 2 - 20, drawY,
-                                x + w / 2 - 10, drawY
-                            );
-                            rightEdge.addColorStop(0, 'rgba(0, 0, 0, 0)');
-                            rightEdge.addColorStop(1, 'rgba(0, 0, 0, 0.4)');
-
-                            ctx.fillStyle = rightEdge;
-                            ctx.beginPath();
-                            ctx.roundRect(
-                                x + w / 2 - 20,
-                                drawY - h + 15,
-                                10,
-                                h - 20,
-                                5
-                            );
-                            ctx.fill();
-                        }
-
-                        ctx.restore();
                     }
+
+                    // 📦 STEP 2: DRAW TOP FACE (medium brightness)
+                    ctx.beginPath();
+                    const topX1 = x - w / 2;
+                    const topY1 = drawY - h;
+                    ctx.moveTo(topX1, topY1);
+                    ctx.lineTo(topX1 + isoX, topY1 - isoY);
+                    ctx.lineTo(topX1 + w + isoX, topY1 - isoY);
+                    ctx.lineTo(topX1 + w, topY1);
+                    ctx.closePath();
+
+                    // Top face gradient (medium brightness, receives some light)
+                    const topGrad = ctx.createLinearGradient(topX1, topY1, topX1 + w, topY1);
+                    topGrad.addColorStop(0, '#ff6b8a');
+                    topGrad.addColorStop(0.3, CFG.COLORS.WALL[0]);
+                    topGrad.addColorStop(0.7, CFG.COLORS.WALL[1]);
+                    topGrad.addColorStop(1, '#ff5577');
+                    ctx.fillStyle = topGrad;
+                    ctx.fill();
+
+                    // Top face texture (lighter, more visible)
+                    for (let tx = 0; tx < w; tx += 10) {
+                        const noiseVal = TextureGen.fractalNoise((wall.x + tx / w) * 5, wall.y * 5, 3, 0.5, 2, 123);
+                        if (noiseVal > 0.4) {
+                            ctx.fillStyle = `rgba(255, 255, 255, ${0.1 * (noiseVal - 0.4)})`;
+                            const px1 = topX1 + tx;
+                            const px2 = px1 + 10;
+                            ctx.beginPath();
+                            ctx.moveTo(px1, topY1);
+                            ctx.lineTo(px1 + isoX, topY1 - isoY);
+                            ctx.lineTo(px2 + isoX, topY1 - isoY);
+                            ctx.lineTo(px2, topY1);
+                            ctx.closePath();
+                            ctx.fill();
+                        }
+                    }
+
+                    // Top edge highlight
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(topX1, topY1);
+                    ctx.lineTo(topX1 + isoX, topY1 - isoY);
+                    ctx.lineTo(topX1 + w + isoX, topY1 - isoY);
+                    ctx.lineTo(topX1 + w, topY1);
+                    ctx.stroke();
+
+                    // 📦 STEP 3: DRAW FRONT FACE (brightest, main face)
+                    const frontX = x - w / 2;
+                    const frontY = drawY - h;
+                    const frontW = w;
+                    const frontH = h;
+
+                    // Front face shadow (contact shadow at bottom)
+                    const shadowGrad = ctx.createLinearGradient(frontX, drawY - 30, frontX, drawY);
+                    shadowGrad.addColorStop(0, 'rgba(0, 0, 0, 0)');
+                    shadowGrad.addColorStop(1, 'rgba(0, 0, 0, 0.3)');
+                    ctx.fillStyle = shadowGrad;
+                    ctx.fillRect(frontX, drawY - 30, frontW, 30);
+
+                    // Main front face - PREMIUM GRADIENT
+                    const frontGrad = ctx.createLinearGradient(frontX, frontY, frontX, frontY + frontH);
+                    frontGrad.addColorStop(0, CFG.COLORS.WALL[1]);
+                    frontGrad.addColorStop(0.2, CFG.COLORS.WALL[0]); // Brightest at top
+                    frontGrad.addColorStop(0.5, CFG.COLORS.WALL[0]);
+                    frontGrad.addColorStop(0.8, CFG.COLORS.WALL[1]);
+                    frontGrad.addColorStop(1, CFG.COLORS.WALL[2]);
+
+                    ctx.fillStyle = frontGrad;
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = 'rgba(255, 51, 102, 0.8)';
+                    ctx.fillRect(frontX + 3, frontY + 3, frontW - 6, frontH - 6);
+                    ctx.shadowBlur = 0;
+
+                    // 🧱 PREMIUM BRICK TEXTURE on front face
+                    const brickH = 18;
+                    const brickW = 40;
+                    const mortarSize = 2;
+
+                    for (let by = 0; by < frontH; by += brickH) {
+                        const row = Math.floor(by / brickH);
+                        const rowOffset = (row % 2) * (brickW / 2);
+
+                        for (let bx = -brickW; bx < frontW + brickW; bx += brickW) {
+                            const brickX = frontX + bx + rowOffset;
+                            const brickY = frontY + by;
+
+                            // Skip if outside wall
+                            if (brickX + brickW < frontX || brickX > frontX + frontW) continue;
+
+                            // Brick base with noise
+                            const noise = TextureGen.fractalNoise(
+                                (brickX + brickY) / 30,
+                                brickY / 30,
+                                4, 0.6, 3, wall.x * 7 + wall.y * 11
+                            );
+
+                            // Brick color variation
+                            const brickDark = Math.floor((noise - 0.5) * 40);
+                            ctx.fillStyle = `rgba(${200 + brickDark}, ${40 + brickDark}, ${60 + brickDark}, 0.3)`;
+                            ctx.fillRect(
+                                Math.max(brickX + mortarSize, frontX),
+                                brickY + mortarSize,
+                                Math.min(brickW - mortarSize * 2, frontX + frontW - brickX - mortarSize),
+                                brickH - mortarSize * 2
+                            );
+
+                            // Brick highlight (top edge)
+                            ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+                            ctx.fillRect(
+                                Math.max(brickX + mortarSize, frontX),
+                                brickY + mortarSize,
+                                Math.min(brickW - mortarSize * 2, frontX + frontW - brickX - mortarSize),
+                                2
+                            );
+
+                            // Brick shadow (bottom edge)
+                            ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+                            ctx.fillRect(
+                                Math.max(brickX + mortarSize, frontX),
+                                brickY + brickH - mortarSize - 1,
+                                Math.min(brickW - mortarSize * 2, frontX + frontW - brickX - mortarSize),
+                                1
+                            );
+                        }
+                    }
+
+                    // Front face edge glow
+                    ctx.strokeStyle = 'rgba(255, 100, 130, 0.5)';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(frontX + 2, frontY + 2, frontW - 4, frontH - 4);
+
+                    // Inner edge shadow for depth
+                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(frontX + 4, frontY + 4, frontW - 8, frontH - 8);
+
+                    ctx.restore();
                 });
                 ctx.shadowBlur = 0;
             },
