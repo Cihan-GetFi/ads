@@ -1171,7 +1171,14 @@
                 this.gridX += this.direction.x * speed;
                 this.gridY += this.direction.y * speed;
 
+                // Clamp X position
                 this.gridX = Math.max(0.5, Math.min(CFG.GRID_WIDTH - 0.5, this.gridX));
+
+                // 🚨 CRITICAL: Clamp Y position to keep player on screen
+                // Player must stay within visible camera range
+                const minY = Camera.y - 3;  // Player can be slightly above camera center
+                const maxY = Camera.y + 10; // Player can be below camera center
+                this.gridY = Math.max(minY, Math.min(maxY, this.gridY));
 
                 // 🎾 ROLLING ANIMATION - Ball rotates as it moves
                 const moveSpeed = Math.sqrt(
@@ -1241,9 +1248,12 @@
             update(dt) {
                 if (Game.state !== 'playing') return;
 
+                // 🎬 IMPROVED CAMERA TRACKING - Follow player smoothly
+                // Camera centers on player with smooth lerp
+                const targetY = Player.gridY;
+                this.y += (targetY - this.y) * 0.15; // Faster follow (was 0.1)
+
                 // 🎬 AUTO-SCROLL DOWN - Map scrolls downward automatically
-                const targetY = Player.gridY + 5; // CHANGED: Look ahead DOWN
-                this.y += (targetY - this.y) * 0.1;
                 this.y -= CFG.CAMERA_SPEED * dt; // CHANGED: Scroll DOWN (negative)
 
                 if (this.shakeAmount > 0) {
