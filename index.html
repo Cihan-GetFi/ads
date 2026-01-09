@@ -1298,39 +1298,40 @@
             },
 
             resize() {
-                const gameAspect = CFG.WIDTH / CFG.HEIGHT; // 360/640 = 0.5625
-                const windowAspect = window.innerWidth / window.innerHeight;
+                const vw = window.innerWidth;
+                const vh = window.innerHeight;
+                const gameAspect = CFG.WIDTH / CFG.HEIGHT; // 0.5625 (9:16)
+                const windowAspect = vw / vh;
 
                 let displayWidth, displayHeight;
 
-                if (windowAspect > gameAspect) {
-                    // Window wider than game - fit to height
-                    displayHeight = window.innerHeight;
-                    displayWidth = displayHeight * gameAspect;
+                // Fill entire viewport while maintaining aspect ratio
+                if (windowAspect < gameAspect) {
+                    // Window is taller (more portrait) - fit to width
+                    displayWidth = vw;
+                    displayHeight = vw / gameAspect;
                 } else {
-                    // Window narrower than game - fit to width
-                    displayWidth = window.innerWidth;
-                    displayHeight = displayWidth / gameAspect;
+                    // Window is wider (more landscape) - fit to height
+                    displayHeight = vh;
+                    displayWidth = vh * gameAspect;
                 }
 
                 // Set canvas display size
-                this.canvas.style.width = Math.floor(displayWidth) + 'px';
-                this.canvas.style.height = Math.floor(displayHeight) + 'px';
+                this.canvas.style.width = displayWidth + 'px';
+                this.canvas.style.height = displayHeight + 'px';
 
-                // Set canvas buffer size - this resets the context
-                const needsContextReset = this.canvas.width !== CFG.WIDTH * CFG.PIXEL_RATIO;
-                this.canvas.width = CFG.WIDTH * CFG.PIXEL_RATIO;
-                this.canvas.height = CFG.HEIGHT * CFG.PIXEL_RATIO;
+                // Set canvas buffer size
+                const newWidth = CFG.WIDTH * CFG.PIXEL_RATIO;
+                const newHeight = CFG.HEIGHT * CFG.PIXEL_RATIO;
 
-                // Recreate context after canvas resize
-                if (needsContextReset && this.ctx) {
+                if (this.canvas.width !== newWidth || this.canvas.height !== newHeight) {
+                    this.canvas.width = newWidth;
+                    this.canvas.height = newHeight;
+
+                    // Recreate context after canvas resize
                     this.ctx = this.canvas.getContext('2d', { alpha: false, desynchronized: true });
                     this.ctx.imageSmoothingEnabled = true;
                     this.ctx.imageSmoothingQuality = 'high';
-                }
-
-                if (this.ctx) {
-                    this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
                     this.ctx.scale(CFG.PIXEL_RATIO, CFG.PIXEL_RATIO);
                 }
             },
