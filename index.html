@@ -439,13 +439,30 @@
                 { x: 4, y: 6 }, { x: 4, y: 9 }, { x: 3, y: 12 }, { x: 5, y: 12 }, { x: 4, y: 15 },
                 { x: 2, y: 19 }, { x: 6, y: 19 }, { x: 4, y: 22 }, { x: 3, y: 25 }, { x: 5, y: 25 }, { x: 4, y: 28 },
                 { x: 3, y: 34 }, { x: 4, y: 34 }, { x: 5, y: 34 }, { x: 2, y: 38 }, { x: 6, y: 38 }, { x: 4, y: 42 },
-                { x: 3, y: 46 }, { x: 5, y: 46 }, { x: 4, y: 50 }
+                { x: 3, y: 46 }, { x: 5, y: 46 }, { x: 4, y: 50 }, { x: 4, y: 54 }, { x: 3, y: 58 }, { x: 5, y: 58 }
             ],
             walls: [
                 { x: 1, y: 10, w: 2, h: 1 }, { x: 6, y: 10, w: 2, h: 1 },
                 { x: 0, y: 17, w: 3, h: 1 }, { x: 6, y: 17, w: 3, h: 1 },
                 { x: 2, y: 30, w: 2, h: 1 }, { x: 5, y: 32, w: 2, h: 1 },
                 { x: 0, y: 40, w: 2, h: 1 }, { x: 7, y: 40, w: 2, h: 1 }
+            ],
+            // 🔥 MOVING WALLS - Horizontal sliding obstacles
+            movingWalls: [
+                { x: 2, y: 14, w: 2, h: 1, minX: 1, maxX: 6, speed: 1.5, dir: 1 },
+                { x: 5, y: 26, w: 2, h: 1, minX: 1, maxX: 6, speed: 2, dir: -1 },
+                { x: 3, y: 44, w: 2, h: 1, minX: 0, maxX: 7, speed: 1.8, dir: 1 }
+            ],
+            // 🎯 TURRETS - Stationary enemies that shoot
+            turrets: [
+                { x: 0.5, y: 20, shootDelay: 2.5, lastShot: 0 },
+                { x: 8.5, y: 35, shootDelay: 2.0, lastShot: 0 },
+                { x: 0.5, y: 48, shootDelay: 3.0, lastShot: 0 }
+            ],
+            // ⚡ LASERS - Blinking deadly beams
+            lasers: [
+                { x: 2, y: 24, w: 5, h: 0.2, onTime: 1.5, offTime: 1.5, timer: 0, active: true },
+                { x: 1, y: 52, w: 7, h: 0.2, onTime: 1.0, offTime: 2.0, timer: 0, active: false }
             ]
         };
 
@@ -1256,10 +1273,18 @@
         const Entities = {
             coins: [],
             walls: [],
+            movingWalls: [],
+            turrets: [],
+            lasers: [],
+            projectiles: [],
 
             init() {
                 this.coins = [];
                 this.walls = [];
+                this.movingWalls = [];
+                this.turrets = [];
+                this.lasers = [];
+                this.projectiles = [];
 
                 LEVEL.coins.forEach(c => {
                     this.coins.push({
@@ -1279,11 +1304,52 @@
                         active: true
                     });
                 });
+
+                // Initialize moving walls
+                LEVEL.movingWalls.forEach(mw => {
+                    this.movingWalls.push({
+                        x: mw.x,
+                        y: mw.y,
+                        w: mw.w,
+                        h: mw.h,
+                        minX: mw.minX,
+                        maxX: mw.maxX,
+                        speed: mw.speed,
+                        dir: mw.dir,
+                        active: true
+                    });
+                });
+
+                // Initialize turrets
+                LEVEL.turrets.forEach(t => {
+                    this.turrets.push({
+                        x: t.x,
+                        y: t.y,
+                        shootDelay: t.shootDelay,
+                        lastShot: t.lastShot,
+                        charging: 0
+                    });
+                });
+
+                // Initialize lasers
+                LEVEL.lasers.forEach(l => {
+                    this.lasers.push({
+                        x: l.x,
+                        y: l.y,
+                        w: l.w,
+                        h: l.h,
+                        onTime: l.onTime,
+                        offTime: l.offTime,
+                        timer: 0,
+                        active: l.active
+                    });
+                });
             },
 
             update(dt) {
                 const time = performance.now() / 1000;
 
+                // Update coins
                 this.coins.forEach(coin => {
                     if (coin.collected) {
                         coin.scale += dt * 6;
@@ -1293,8 +1359,78 @@
                         coin.rotation += dt * 2;
                     }
                 });
-
                 this.coins = this.coins.filter(c => !c.collected || c.alpha > 0);
+
+                // Update moving walls
+                this.movingWalls.forEach(mw => {
+                    mw.x += mw.speed * mw.dir * dt;
+
+                    // Bounce at boundaries
+                    if (mw.x <= mw.minX) {
+                        mw.x = mw.minX;
+                        mw.dir = 1;
+                    } else if (mw.x >= mw.maxX) {
+                        mw.x = mw.maxX;
+                        mw.dir = -1;
+                    }
+                });
+
+                // Update turrets
+                this.turrets.forEach(turret => {
+                    turret.lastShot += dt;
+
+                    // Charging animation
+                    if (turret.lastShot >= turret.shootDelay - 0.5) {
+                        turret.charging = Math.min(1, (turret.lastShot - (turret.shootDelay - 0.5)) / 0.5);
+                    } else {
+                        turret.charging = 0;
+                    }
+
+                    // Shoot projectile
+                    if (turret.lastShot >= turret.shootDelay) {
+                        turret.lastShot = 0;
+
+                        // Calculate direction to player
+                        const dx = Player.gridX - turret.x;
+                        const dy = Player.gridY - turret.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+
+                        if (dist > 0) {
+                            this.projectiles.push({
+                                x: turret.x,
+                                y: turret.y,
+                                vx: (dx / dist) * 8,
+                                vy: (dy / dist) * 8,
+                                life: 0,
+                                maxLife: 5
+                            });
+
+                            Camera.shake(5);
+                        }
+                    }
+                });
+
+                // Update lasers
+                this.lasers.forEach(laser => {
+                    laser.timer += dt;
+
+                    const cycleTime = laser.onTime + laser.offTime;
+                    const cyclePos = laser.timer % cycleTime;
+
+                    laser.active = cyclePos < laser.onTime;
+                });
+
+                // Update projectiles
+                this.projectiles = this.projectiles.filter(p => {
+                    p.x += p.vx * dt;
+                    p.y += p.vy * dt;
+                    p.life += dt;
+
+                    // Remove if out of bounds or too old
+                    return p.life < p.maxLife &&
+                           p.x >= -2 && p.x <= CFG.GRID_WIDTH + 2 &&
+                           p.y >= -10 && p.y <= 100;
+                });
             }
         };
 
@@ -1304,7 +1440,9 @@
 
                 const px = Player.gridX;
                 const py = Player.gridY;
+                const pr = CFG.PLAYER_RADIUS;
 
+                // Coin collection
                 Entities.coins.forEach(coin => {
                     if (coin.collected) return;
 
@@ -1312,16 +1450,15 @@
                     const dy = py - coin.y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
 
-                    if (dist < CFG.PLAYER_RADIUS + CFG.COIN_RADIUS) {
+                    if (dist < pr + CFG.COIN_RADIUS) {
                         this.collectCoin(coin);
                     }
                 });
 
+                // Static walls
                 Entities.walls.forEach(wall => {
                     if (!wall.active) return;
 
-                    const pr = CFG.PLAYER_RADIUS;
-                    // Walls are centered on their X coordinate, so adjust collision bounds
                     const wallLeft = wall.x - wall.w / 2;
                     const wallRight = wall.x + wall.w / 2;
                     const wallTop = wall.y;
@@ -1331,7 +1468,52 @@
                         px - pr < wallRight &&
                         py + pr > wallTop &&
                         py - pr < wallBottom) {
-                        this.hitWall();
+                        this.hitObstacle('wall');
+                    }
+                });
+
+                // Moving walls
+                Entities.movingWalls.forEach(mw => {
+                    if (!mw.active) return;
+
+                    const wallLeft = mw.x - mw.w / 2;
+                    const wallRight = mw.x + mw.w / 2;
+                    const wallTop = mw.y;
+                    const wallBottom = mw.y + mw.h;
+
+                    if (px + pr > wallLeft &&
+                        px - pr < wallRight &&
+                        py + pr > wallTop &&
+                        py - pr < wallBottom) {
+                        this.hitObstacle('moving wall');
+                    }
+                });
+
+                // Projectiles
+                Entities.projectiles.forEach(proj => {
+                    const dx = px - proj.x;
+                    const dy = py - proj.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < pr + 0.2) {
+                        this.hitObstacle('projectile');
+                    }
+                });
+
+                // Lasers (only when active)
+                Entities.lasers.forEach(laser => {
+                    if (!laser.active) return;
+
+                    const laserLeft = laser.x;
+                    const laserRight = laser.x + laser.w;
+                    const laserTop = laser.y;
+                    const laserBottom = laser.y + laser.h;
+
+                    if (px + pr > laserLeft &&
+                        px - pr < laserRight &&
+                        py + pr > laserTop &&
+                        py - pr < laserBottom) {
+                        this.hitObstacle('laser');
                     }
                 });
             },
@@ -1357,7 +1539,7 @@
                 Camera.shake(7);
             },
 
-            hitWall() {
+            hitObstacle(obstacleType) {
                 if (Game.state !== 'playing') return;
                 Game.state = 'gameover';
                 Camera.shake(35);
@@ -1722,7 +1904,11 @@
                 ctx.translate(camOffset.x, 0);
 
                 this.drawShadows(ctx, camOffset);
+                this.drawLasers(ctx, camOffset);
                 this.drawWalls(ctx, camOffset);
+                this.drawMovingWalls(ctx, camOffset);
+                this.drawTurrets(ctx, camOffset);
+                this.drawProjectiles(ctx, camOffset);
                 this.drawCoins(ctx, camOffset);
                 TrailSystem.draw(ctx);
                 this.drawPlayer(ctx, camOffset);
@@ -1959,6 +2145,241 @@
                     ctx.restore();
                 });
                 ctx.shadowBlur = 0;
+            },
+
+            drawMovingWalls(ctx, camOffset) {
+                // Render moving walls with same 3D isometric style as static walls
+                Entities.movingWalls.forEach(wall => {
+                    if (!wall.active) return;
+
+                    const screenY = CFG.HEIGHT - (wall.y * CFG.CELL_SIZE - camOffset.y);
+                    if (screenY < -CFG.CELL_SIZE * 2 || screenY > CFG.HEIGHT + CFG.CELL_SIZE * 2) return;
+
+                    const x = (wall.x - CFG.GRID_WIDTH / 2 + 0.5) * CFG.CELL_SIZE + CFG.WIDTH / 2;
+                    const y = wall.y * CFG.CELL_SIZE;
+                    const w = wall.w * CFG.CELL_SIZE;
+                    const h = wall.h * CFG.CELL_SIZE;
+                    const drawY = CFG.HEIGHT - (y - camOffset.y);
+
+                    const depth = 35;
+                    const isoX = depth * 0.866;
+                    const isoY = depth * 0.5;
+
+                    ctx.save();
+
+                    // Right side face (orange tint for moving walls)
+                    ctx.beginPath();
+                    const rightX1 = x + w / 2;
+                    const rightY1 = drawY - h;
+                    ctx.moveTo(rightX1, rightY1);
+                    ctx.lineTo(rightX1 + isoX, rightY1 - isoY);
+                    ctx.lineTo(rightX1 + isoX, drawY - isoY);
+                    ctx.lineTo(rightX1, drawY);
+                    ctx.closePath();
+
+                    const rightGrad = ctx.createLinearGradient(rightX1, rightY1, rightX1 + isoX, rightY1);
+                    rightGrad.addColorStop(0, '#cc6600');
+                    rightGrad.addColorStop(1, '#883300');
+                    ctx.fillStyle = rightGrad;
+                    ctx.fill();
+
+                    // Top face
+                    ctx.beginPath();
+                    const topX1 = x - w / 2;
+                    const topY1 = drawY - h;
+                    ctx.moveTo(topX1, topY1);
+                    ctx.lineTo(topX1 + isoX, topY1 - isoY);
+                    ctx.lineTo(topX1 + w + isoX, topY1 - isoY);
+                    ctx.lineTo(topX1 + w, topY1);
+                    ctx.closePath();
+
+                    const topGrad = ctx.createLinearGradient(topX1, topY1 - isoY, topX1 + w, topY1);
+                    topGrad.addColorStop(0, '#ff9933');
+                    topGrad.addColorStop(1, '#ff7700');
+                    ctx.fillStyle = topGrad;
+                    ctx.fill();
+
+                    // Front face (brightest)
+                    const frontX = x - w / 2;
+                    const frontY = drawY - h;
+                    const frontW = w;
+                    const frontH = h;
+
+                    const frontGrad = ctx.createLinearGradient(frontX, frontY, frontX, drawY);
+                    frontGrad.addColorStop(0, '#ffaa55');
+                    frontGrad.addColorStop(1, '#ff8833');
+                    ctx.fillStyle = frontGrad;
+                    ctx.fillRect(frontX, frontY, frontW, frontH);
+
+                    // Glowing edge to indicate movement
+                    ctx.strokeStyle = 'rgba(255, 200, 100, 0.8)';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(frontX, frontY, frontW, frontH);
+
+                    ctx.restore();
+                });
+            },
+
+            drawTurrets(ctx, camOffset) {
+                const time = performance.now() / 1000;
+
+                Entities.turrets.forEach(turret => {
+                    const screenY = CFG.HEIGHT - (turret.y * CFG.CELL_SIZE - camOffset.y);
+                    if (screenY < -CFG.CELL_SIZE || screenY > CFG.HEIGHT + CFG.CELL_SIZE) return;
+
+                    const x = (turret.x - CFG.GRID_WIDTH / 2 + 0.5) * CFG.CELL_SIZE + CFG.WIDTH / 2;
+                    const y = CFG.HEIGHT - (turret.y * CFG.CELL_SIZE - camOffset.y);
+
+                    const size = CFG.CELL_SIZE * 0.7;
+
+                    ctx.save();
+                    ctx.translate(x, y);
+
+                    // Charging glow effect
+                    if (turret.charging > 0) {
+                        const glowSize = size * (1 + turret.charging * 0.5);
+                        const glowGrad = ctx.createRadialGradient(0, 0, size * 0.3, 0, 0, glowSize);
+                        glowGrad.addColorStop(0, `rgba(255, 50, 50, ${turret.charging * 0.6})`);
+                        glowGrad.addColorStop(1, 'rgba(255, 50, 50, 0)');
+                        ctx.fillStyle = glowGrad;
+                        ctx.fillRect(-glowSize, -glowSize, glowSize * 2, glowSize * 2);
+                    }
+
+                    // Turret base
+                    const baseGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, size * 0.5);
+                    baseGrad.addColorStop(0, '#666666');
+                    baseGrad.addColorStop(0.7, '#333333');
+                    baseGrad.addColorStop(1, '#111111');
+                    ctx.fillStyle = baseGrad;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, size * 0.5, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Turret barrel pointing at player
+                    const dx = Player.gridX - turret.x;
+                    const dy = Player.gridY - turret.y;
+                    const angle = Math.atan2(dy, dx);
+
+                    ctx.rotate(angle);
+
+                    // Barrel
+                    const barrelGrad = ctx.createLinearGradient(0, -size * 0.15, 0, size * 0.15);
+                    barrelGrad.addColorStop(0, '#444444');
+                    barrelGrad.addColorStop(0.5, '#222222');
+                    barrelGrad.addColorStop(1, '#444444');
+                    ctx.fillStyle = barrelGrad;
+                    ctx.fillRect(0, -size * 0.15, size * 0.5, size * 0.3);
+
+                    // Muzzle
+                    ctx.fillStyle = turret.charging > 0.5 ? '#ff3333' : '#000000';
+                    ctx.beginPath();
+                    ctx.arc(size * 0.5, 0, size * 0.12, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.restore();
+                });
+            },
+
+            drawProjectiles(ctx, camOffset) {
+                Entities.projectiles.forEach(proj => {
+                    const screenY = CFG.HEIGHT - (proj.y * CFG.CELL_SIZE - camOffset.y);
+                    if (screenY < -CFG.CELL_SIZE || screenY > CFG.HEIGHT + CFG.CELL_SIZE) return;
+
+                    const x = (proj.x - CFG.GRID_WIDTH / 2 + 0.5) * CFG.CELL_SIZE + CFG.WIDTH / 2;
+                    const y = CFG.HEIGHT - (proj.y * CFG.CELL_SIZE - camOffset.y);
+
+                    const size = CFG.CELL_SIZE * 0.3;
+
+                    ctx.save();
+                    ctx.translate(x, y);
+
+                    // Outer glow
+                    const glowGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, size * 1.5);
+                    glowGrad.addColorStop(0, 'rgba(255, 100, 100, 0.8)');
+                    glowGrad.addColorStop(0.5, 'rgba(255, 50, 50, 0.4)');
+                    glowGrad.addColorStop(1, 'rgba(255, 0, 0, 0)');
+                    ctx.fillStyle = glowGrad;
+                    ctx.fillRect(-size * 1.5, -size * 1.5, size * 3, size * 3);
+
+                    // Core projectile
+                    const coreGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, size * 0.6);
+                    coreGrad.addColorStop(0, '#ffff00');
+                    coreGrad.addColorStop(0.5, '#ff8800');
+                    coreGrad.addColorStop(1, '#ff0000');
+                    ctx.fillStyle = coreGrad;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, size * 0.6, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Bright core
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(-size * 0.15, -size * 0.15, size * 0.3, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.restore();
+                });
+            },
+
+            drawLasers(ctx, camOffset) {
+                const time = performance.now() / 1000;
+
+                Entities.lasers.forEach(laser => {
+                    const screenY = CFG.HEIGHT - (laser.y * CFG.CELL_SIZE - camOffset.y);
+                    if (screenY < -CFG.CELL_SIZE || screenY > CFG.HEIGHT + CFG.CELL_SIZE) return;
+
+                    const x = (laser.x - CFG.GRID_WIDTH / 2 + 0.5) * CFG.CELL_SIZE + CFG.WIDTH / 2;
+                    const y = laser.y * CFG.CELL_SIZE;
+                    const w = laser.w * CFG.CELL_SIZE;
+                    const h = laser.h * CFG.CELL_SIZE;
+                    const drawY = CFG.HEIGHT - (y - camOffset.y);
+
+                    ctx.save();
+
+                    if (laser.active) {
+                        // Active laser - deadly red beam
+                        const alpha = 0.8 + Math.sin(time * 20) * 0.2;
+
+                        // Outer glow
+                        const glowGrad = ctx.createLinearGradient(x, drawY - h * 3, x, drawY + h * 3);
+                        glowGrad.addColorStop(0, 'rgba(255, 0, 0, 0)');
+                        glowGrad.addColorStop(0.5, `rgba(255, 0, 0, ${alpha * 0.3})`);
+                        glowGrad.addColorStop(1, 'rgba(255, 0, 0, 0)');
+                        ctx.fillStyle = glowGrad;
+                        ctx.fillRect(x, drawY - h * 3, w, h * 6);
+
+                        // Core beam
+                        const beamGrad = ctx.createLinearGradient(x, drawY - h, x, drawY + h);
+                        beamGrad.addColorStop(0, 'rgba(255, 255, 255, 0)');
+                        beamGrad.addColorStop(0.5, `rgba(255, 255, 255, ${alpha})`);
+                        beamGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                        ctx.fillStyle = beamGrad;
+                        ctx.fillRect(x, drawY - h, w, h * 2);
+
+                        // Bright center line
+                        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+                        ctx.fillRect(x, drawY - h / 2, w, h);
+                    } else {
+                        // Inactive - warning indicators
+                        const cycleTime = laser.onTime + laser.offTime;
+                        const cyclePos = laser.timer % cycleTime;
+                        const timeUntilActive = laser.onTime + laser.offTime - cyclePos;
+
+                        // Blinking warning dots
+                        if (Math.floor(time * 4) % 2 === 0) {
+                            ctx.fillStyle = 'rgba(255, 100, 100, 0.5)';
+                            const dotSize = CFG.CELL_SIZE * 0.15;
+                            for (let i = 0; i < laser.w; i += 0.5) {
+                                const dotX = (laser.x + i - CFG.GRID_WIDTH / 2 + 0.5) * CFG.CELL_SIZE + CFG.WIDTH / 2;
+                                ctx.beginPath();
+                                ctx.arc(dotX, drawY, dotSize, 0, Math.PI * 2);
+                                ctx.fill();
+                            }
+                        }
+                    }
+
+                    ctx.restore();
+                });
             },
 
             drawCoins(ctx, camOffset) {
