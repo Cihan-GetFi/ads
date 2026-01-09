@@ -583,11 +583,22 @@
                 ctx.imageSmoothingEnabled = true;
                 ctx.imageSmoothingQuality = 'high';
 
-                // Shadow base (depth simulation)
+                // 3D DEPTH: Bottom contact shadow (sphere on surface)
+                const contactShadow = ctx.createRadialGradient(s * 0.5, s * 0.75, 0, s * 0.5, s * 0.75, s * 0.35);
+                contactShadow.addColorStop(0, 'rgba(0, 0, 0, 0.5)');
+                contactShadow.addColorStop(0.6, 'rgba(0, 0, 0, 0.2)');
+                contactShadow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                ctx.fillStyle = contactShadow;
+                ctx.beginPath();
+                ctx.ellipse(s * 0.5, s * 0.75, s * 0.35, s * 0.15, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Shadow base (depth simulation - darker on bottom)
                 const shadowGrad = ctx.createRadialGradient(s * 0.55, s * 0.65, 0, s * 0.5, s * 0.5, s * 0.5);
                 shadowGrad.addColorStop(0, 'rgba(0, 0, 0, 0)');
-                shadowGrad.addColorStop(0.7, 'rgba(0, 0, 0, 0.15)');
-                shadowGrad.addColorStop(1, 'rgba(0, 0, 0, 0.4)');
+                shadowGrad.addColorStop(0.65, 'rgba(0, 0, 0, 0.2)');
+                shadowGrad.addColorStop(0.85, 'rgba(0, 0, 0, 0.4)');
+                shadowGrad.addColorStop(1, 'rgba(0, 0, 0, 0.6)');
                 ctx.fillStyle = shadowGrad;
                 ctx.beginPath();
                 ctx.arc(s / 2, s / 2, s / 2 - 3, 0, Math.PI * 2);
@@ -683,11 +694,33 @@
                 ctx.imageSmoothingEnabled = true;
                 ctx.imageSmoothingQuality = 'high';
 
-                // Shadow base
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+                // 3D ISOMETRIC: Coin edge depth layers
+                const edgeThickness = 12;
+                const tiltAngle = 0.15; // Slight tilt for 3D effect
+
+                // Shadow base (more pronounced for 3D)
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
                 ctx.beginPath();
-                ctx.ellipse(s * 0.52, s * 0.55, s * 0.44, s * 0.38, 0, 0, Math.PI * 2);
+                ctx.ellipse(s * 0.52, s * 0.58, s * 0.46, s * 0.35, 0, 0, Math.PI * 2);
                 ctx.fill();
+
+                // 3D Edge layers (bottom to top)
+                for (let i = edgeThickness; i >= 0; i--) {
+                    const progress = i / edgeThickness;
+                    const yOffset = i * 0.8;
+
+                    // Edge gradient (darker at bottom, lighter at top)
+                    const edgeGrad = ctx.createLinearGradient(0, s / 2 + yOffset - edgeThickness, 0, s / 2 + yOffset);
+                    edgeGrad.addColorStop(0, '#5a4509');
+                    edgeGrad.addColorStop(0.3, '#8b6914');
+                    edgeGrad.addColorStop(0.6, '#b8860b');
+                    edgeGrad.addColorStop(1, '#daa520');
+
+                    ctx.fillStyle = edgeGrad;
+                    ctx.beginPath();
+                    ctx.ellipse(s / 2, s / 2 + yOffset, s / 2 - 2, (s / 2 - 2) * 0.85, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                }
 
                 // Outer ring - multi-layer metallic gold
                 const outerGradient = ctx.createRadialGradient(s / 2, s / 2, s * 0.2, s / 2, s / 2, s / 2);
@@ -885,6 +918,8 @@
             scale: 1,
             squashTime: 0,
             trailTimer: 0,
+            deathAnimation: 0, // 0 = alive, 0-1 = death animation progress
+            deathFragments: [],
 
             init() {
                 this.gridX = CFG.PLAYER_START.x;
@@ -892,6 +927,8 @@
                 this.direction = { x: 0, y: 1 };
                 this.scale = 1;
                 this.trailTimer = 0;
+                this.deathAnimation = 0;
+                this.deathFragments = [];
             },
 
             setDirection(dir) {
@@ -925,6 +962,21 @@
             },
 
             update(dt) {
+                // Update death animation
+                if (this.deathAnimation > 0) {
+                    this.deathAnimation = Math.min(1, this.deathAnimation + dt * 2);
+
+                    // Update death fragments
+                    this.deathFragments.forEach(frag => {
+                        frag.x += frag.vx * dt * 60;
+                        frag.y += frag.vy * dt * 60;
+                        frag.vy += 0.3; // gravity
+                        frag.rotation += frag.rotSpeed * dt;
+                        frag.alpha = Math.max(0, 1 - this.deathAnimation);
+                    });
+                    return;
+                }
+
                 if (Game.state !== 'playing') return;
 
                 const speed = CFG.PLAYER_SPEED * dt;
@@ -943,6 +995,32 @@
                     const camOffset = Camera.getOffset();
                     TrailSystem.add(pos.x, CFG.HEIGHT - (pos.y - camOffset.y));
                     this.trailTimer = 0;
+                }
+            },
+
+            startDeathAnimation() {
+                this.deathAnimation = 0.01;
+
+                // Create fragments (8 pieces)
+                const pos = this.getWorldPos();
+                const camOffset = Camera.getOffset();
+                const centerX = pos.x;
+                const centerY = CFG.HEIGHT - (pos.y - camOffset.y);
+
+                for (let i = 0; i < 8; i++) {
+                    const angle = (i / 8) * Math.PI * 2;
+                    const speed = 3 + Math.random() * 2;
+                    this.deathFragments.push({
+                        x: centerX,
+                        y: centerY,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed - 2,
+                        rotation: Math.random() * Math.PI * 2,
+                        rotSpeed: (Math.random() - 0.5) * 10,
+                        size: 15 + Math.random() * 10,
+                        alpha: 1,
+                        color: CFG.COLORS.PLAYER[Math.floor(Math.random() * 3)]
+                    });
                 }
             },
 
@@ -1104,15 +1182,27 @@
                 if (Game.state !== 'playing') return;
                 Game.state = 'gameover';
                 Camera.shake(35);
-                Player.squashTime = 0.5;
+
+                // Start death animation
+                Player.startDeathAnimation();
 
                 const pos = Player.getWorldPos();
                 const camOffset = Camera.getOffset();
+
+                // Massive particle explosion
                 ParticleSystem.spawnBurst(
                     pos.x,
                     CFG.HEIGHT - (pos.y - camOffset.y),
-                    30,
-                    { color: CFG.COLORS.WALL, size: 8, life: 1.4, speed: 7, spread: 4, gravity: 0.25 }
+                    50,
+                    { color: CFG.COLORS.WALL, size: 8, life: 1.4, speed: 9, spread: 5, gravity: 0.25 }
+                );
+
+                // Secondary player-colored explosion
+                ParticleSystem.spawnBurst(
+                    pos.x,
+                    CFG.HEIGHT - (pos.y - camOffset.y),
+                    40,
+                    { color: CFG.COLORS.PLAYER, size: 6, life: 1.2, speed: 7, spread: 4, gravity: 0.2 }
                 );
 
                 setTimeout(() => Game.showCTA(), 1200);
@@ -1445,46 +1535,119 @@
                     const y = wall.y * CFG.CELL_SIZE;
                     const w = wall.w * CFG.CELL_SIZE;
                     const h = wall.h * CFG.CELL_SIZE;
+                    const drawY = CFG.HEIGHT - (y - camOffset.y);
 
-                    const wallGradient = ctx.createLinearGradient(
-                        x, CFG.HEIGHT - (y - camOffset.y),
-                        x, CFG.HEIGHT - (y - camOffset.y) - h
-                    );
-                    wallGradient.addColorStop(0, CFG.COLORS.WALL[0]);
-                    wallGradient.addColorStop(0.5, CFG.COLORS.WALL[1]);
-                    wallGradient.addColorStop(1, CFG.COLORS.WALL[2]);
+                    // 3D LAYERED WALL - Multiple depth layers
+                    const depthOffset = 8;
+                    const numLayers = 3;
 
-                    ctx.fillStyle = wallGradient;
-                    ctx.shadowBlur = 10;
-                    ctx.shadowColor = 'rgba(255, 51, 102, 0.6)';
-                    ctx.beginPath();
-                    ctx.roundRect(
-                        x - w / 2 + 5,
-                        CFG.HEIGHT - (y - camOffset.y) - h + 5,
-                        w - 10,
-                        h - 10,
-                        10
-                    );
-                    ctx.fill();
+                    // Shadow/depth layers (drawn back to front)
+                    for (let i = numLayers - 1; i >= 0; i--) {
+                        const layerDepth = i * depthOffset;
+                        const layerAlpha = 0.3 + (i / numLayers) * 0.7;
 
-                    const highlightGradient = ctx.createLinearGradient(
-                        x, CFG.HEIGHT - (y - camOffset.y) - h + 10,
-                        x, CFG.HEIGHT - (y - camOffset.y) - h + 10 + (h - 20) * 0.5
-                    );
-                    highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
-                    highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                        ctx.save();
+                        ctx.globalAlpha = layerAlpha;
 
-                    ctx.fillStyle = highlightGradient;
-                    ctx.shadowBlur = 0;
-                    ctx.beginPath();
-                    ctx.roundRect(
-                        x - w / 2 + 12,
-                        CFG.HEIGHT - (y - camOffset.y) - h + 12,
-                        w - 24,
-                        (h - 24) * 0.5,
-                        8
-                    );
-                    ctx.fill();
+                        // Layer shadow
+                        if (i > 0) {
+                            ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+                            ctx.beginPath();
+                            ctx.roundRect(
+                                x - w / 2 + 5 + layerDepth,
+                                drawY - h + 5 + layerDepth,
+                                w - 10,
+                                h - 10,
+                                10
+                            );
+                            ctx.fill();
+                        }
+
+                        // Main wall gradient
+                        const wallGradient = ctx.createLinearGradient(
+                            x, drawY - h + layerDepth,
+                            x, drawY + layerDepth
+                        );
+                        wallGradient.addColorStop(0, CFG.COLORS.WALL[2]);
+                        wallGradient.addColorStop(0.3, CFG.COLORS.WALL[1]);
+                        wallGradient.addColorStop(0.6, CFG.COLORS.WALL[0]);
+                        wallGradient.addColorStop(1, CFG.COLORS.WALL[1]);
+
+                        ctx.fillStyle = wallGradient;
+                        ctx.shadowBlur = i === 0 ? 15 : 0;
+                        ctx.shadowColor = 'rgba(255, 51, 102, 0.8)';
+                        ctx.beginPath();
+                        ctx.roundRect(
+                            x - w / 2 + 5 + layerDepth,
+                            drawY - h + 5 + layerDepth,
+                            w - 10,
+                            h - 10,
+                            10
+                        );
+                        ctx.fill();
+                        ctx.shadowBlur = 0;
+
+                        // Top highlight (3D edge)
+                        if (i === 0) {
+                            const topHighlight = ctx.createLinearGradient(
+                                x, drawY - h + 10,
+                                x, drawY - h + 25
+                            );
+                            topHighlight.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
+                            topHighlight.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+                            ctx.fillStyle = topHighlight;
+                            ctx.beginPath();
+                            ctx.roundRect(
+                                x - w / 2 + 12,
+                                drawY - h + 12,
+                                w - 24,
+                                15,
+                                8
+                            );
+                            ctx.fill();
+
+                            // Side edge highlight (left side)
+                            const leftEdge = ctx.createLinearGradient(
+                                x - w / 2 + 10, drawY,
+                                x - w / 2 + 20, drawY
+                            );
+                            leftEdge.addColorStop(0, 'rgba(255, 100, 130, 0.5)');
+                            leftEdge.addColorStop(1, 'rgba(255, 100, 130, 0)');
+
+                            ctx.fillStyle = leftEdge;
+                            ctx.beginPath();
+                            ctx.roundRect(
+                                x - w / 2 + 10,
+                                drawY - h + 15,
+                                10,
+                                h - 20,
+                                5
+                            );
+                            ctx.fill();
+
+                            // Side edge shadow (right side)
+                            const rightEdge = ctx.createLinearGradient(
+                                x + w / 2 - 20, drawY,
+                                x + w / 2 - 10, drawY
+                            );
+                            rightEdge.addColorStop(0, 'rgba(0, 0, 0, 0)');
+                            rightEdge.addColorStop(1, 'rgba(0, 0, 0, 0.4)');
+
+                            ctx.fillStyle = rightEdge;
+                            ctx.beginPath();
+                            ctx.roundRect(
+                                x + w / 2 - 20,
+                                drawY - h + 15,
+                                10,
+                                h - 20,
+                                5
+                            );
+                            ctx.fill();
+                        }
+
+                        ctx.restore();
+                    }
                 });
                 ctx.shadowBlur = 0;
             },
@@ -1517,6 +1680,42 @@
             },
 
             drawPlayer(ctx, camOffset) {
+                // Draw death fragments if animating
+                if (Player.deathAnimation > 0) {
+                    Player.deathFragments.forEach(frag => {
+                        ctx.save();
+                        ctx.globalAlpha = frag.alpha;
+                        ctx.translate(frag.x, frag.y);
+                        ctx.rotate(frag.rotation);
+
+                        // 3D fragment with gradient
+                        const fragGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, frag.size);
+                        fragGrad.addColorStop(0, frag.color);
+                        fragGrad.addColorStop(0.7, frag.color + 'aa');
+                        fragGrad.addColorStop(1, frag.color + '00');
+
+                        ctx.fillStyle = fragGrad;
+                        ctx.shadowColor = frag.color;
+                        ctx.shadowBlur = 12;
+
+                        // Draw irregular polygon fragment
+                        ctx.beginPath();
+                        for (let i = 0; i < 5; i++) {
+                            const angle = (i / 5) * Math.PI * 2;
+                            const r = frag.size * (0.7 + Math.random() * 0.3);
+                            const x = Math.cos(angle) * r;
+                            const y = Math.sin(angle) * r;
+                            if (i === 0) ctx.moveTo(x, y);
+                            else ctx.lineTo(x, y);
+                        }
+                        ctx.closePath();
+                        ctx.fill();
+
+                        ctx.restore();
+                    });
+                    return;
+                }
+
                 const pos = Player.getWorldPos();
                 const size = CFG.CELL_SIZE * 0.85;
 
