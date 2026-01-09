@@ -19,15 +19,21 @@
         }
         #game {
             position: relative;
-            width: 100%; height: 100%;
-            max-width: 414px;
-            margin: 0 auto;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             background: radial-gradient(ellipse at center, #1a2332 0%, #0a0e1a 70%, #000000 100%);
         }
         #c {
             display: block;
-            width: 100%;
-            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
         }
         #loader {
             position: absolute;
@@ -1170,15 +1176,50 @@
 
             init() {
                 this.canvas = document.getElementById('c');
-                this.canvas.width = CFG.WIDTH * CFG.PIXEL_RATIO;
-                this.canvas.height = CFG.HEIGHT * CFG.PIXEL_RATIO;
-                this.canvas.style.width = '100%';
-                this.canvas.style.height = '100%';
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
 
                 this.ctx = this.canvas.getContext('2d', { alpha: false, desynchronized: true });
-                this.ctx.scale(CFG.PIXEL_RATIO, CFG.PIXEL_RATIO);
                 this.ctx.imageSmoothingEnabled = true;
                 this.ctx.imageSmoothingQuality = 'high';
+            },
+
+            resize() {
+                const gameAspect = CFG.WIDTH / CFG.HEIGHT; // 360/640 = 0.5625
+                const windowAspect = window.innerWidth / window.innerHeight;
+
+                let displayWidth, displayHeight;
+
+                if (windowAspect > gameAspect) {
+                    // Window wider than game - fit to height
+                    displayHeight = window.innerHeight;
+                    displayWidth = displayHeight * gameAspect;
+                } else {
+                    // Window narrower than game - fit to width
+                    displayWidth = window.innerWidth;
+                    displayHeight = displayWidth / gameAspect;
+                }
+
+                // Set canvas display size
+                this.canvas.style.width = Math.floor(displayWidth) + 'px';
+                this.canvas.style.height = Math.floor(displayHeight) + 'px';
+
+                // Set canvas buffer size - this resets the context
+                const needsContextReset = this.canvas.width !== CFG.WIDTH * CFG.PIXEL_RATIO;
+                this.canvas.width = CFG.WIDTH * CFG.PIXEL_RATIO;
+                this.canvas.height = CFG.HEIGHT * CFG.PIXEL_RATIO;
+
+                // Recreate context after canvas resize
+                if (needsContextReset && this.ctx) {
+                    this.ctx = this.canvas.getContext('2d', { alpha: false, desynchronized: true });
+                    this.ctx.imageSmoothingEnabled = true;
+                    this.ctx.imageSmoothingQuality = 'high';
+                }
+
+                if (this.ctx) {
+                    this.ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
+                    this.ctx.scale(CFG.PIXEL_RATIO, CFG.PIXEL_RATIO);
+                }
             },
 
             draw() {
