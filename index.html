@@ -1174,10 +1174,12 @@
                 // Clamp X position
                 this.gridX = Math.max(0.5, Math.min(CFG.GRID_WIDTH - 0.5, this.gridX));
 
-                // 🚨 FIX: Keep player centered on screen
-                // Player stays in middle area, camera scrolls around it
-                const minY = Camera.y - 2;  // Player can be slightly above camera
-                const maxY = Camera.y + 2;  // Player can be slightly below camera
+                // 🚨 FIX: Keep player visible and centered on screen
+                // Player should stay near center: Camera.y + 8 is exact center
+                // Allow movement ±2 units around center for responsive controls
+                const centerY = Camera.y + 8;  // Screen center in grid coordinates
+                const minY = centerY - 2;      // Can move up (draws lower on screen)
+                const maxY = centerY + 2;      // Can move down (draws higher on screen)
                 this.gridY = Math.max(minY, Math.min(maxY, this.gridY));
 
                 // 🎾 ROLLING ANIMATION - Ball rotates as it moves
@@ -1241,7 +1243,7 @@
             shakeY: 0,
 
             init() {
-                this.y = Player.gridY - 5;
+                this.y = Player.gridY - 8; // FIX: Camera offset for player to be centered on screen
                 this.shakeAmount = 0;
             },
 
