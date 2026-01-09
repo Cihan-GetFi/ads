@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <meta name="ad.size" content="width=320,height=480">
-    <title>G-Roll - Premium Edition</title>
+    <title>G-Roll - Ultra Premium Edition</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body {
@@ -14,152 +14,254 @@
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             user-select: none;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Arial Black', 'Arial Bold', sans-serif;
+            background: #000;
         }
         #game {
             position: relative;
             width: 100%; height: 100%;
             max-width: 414px;
             margin: 0 auto;
-            background: #000;
+            background: radial-gradient(ellipse at center, #1a2332 0%, #0a0e1a 70%, #000000 100%);
         }
         #c {
             display: block;
             width: 100%;
             height: 100%;
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: crisp-edges;
         }
         #loader {
             position: absolute;
             inset: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 24px;
+            gap: 40px;
             z-index: 200;
-            transition: opacity 0.5s ease-out;
+            transition: opacity 0.6s ease-out;
         }
         #loader.hidden {
             opacity: 0;
             pointer-events: none;
         }
         #loader .logo {
-            font-size: 64px;
+            font-size: 82px;
             font-weight: 900;
-            background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 50%, #CDDC39 100%);
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 25%, #fff59d 50%, #ffed4e 75%, #ffd700 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            letter-spacing: 6px;
-            animation: logoGlow 2s ease-in-out infinite;
+            letter-spacing: 10px;
+            animation: logoShine 3s ease-in-out infinite;
+            filter: drop-shadow(0 8px 30px rgba(255, 215, 0, 0.8)) drop-shadow(0 0 60px rgba(255, 215, 0, 0.4));
+            text-shadow: 0 0 80px rgba(255, 215, 0, 0.6);
         }
-        @keyframes logoGlow {
-            0%, 100% { filter: drop-shadow(0 0 10px rgba(76, 175, 80, 0.5)); }
-            50% { filter: drop-shadow(0 0 20px rgba(76, 175, 80, 0.8)); }
+        @keyframes logoShine {
+            0%, 100% {
+                filter: drop-shadow(0 8px 30px rgba(255, 215, 0, 0.8)) drop-shadow(0 0 60px rgba(255, 215, 0, 0.4));
+                transform: scale(1) translateY(0);
+            }
+            50% {
+                filter: drop-shadow(0 12px 40px rgba(255, 215, 0, 1)) drop-shadow(0 0 80px rgba(255, 215, 0, 0.6));
+                transform: scale(1.08) translateY(-5px);
+            }
+        }
+        #loader .progress-container {
+            width: 280px;
+            padding: 6px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 20px;
+            box-shadow: inset 0 4px 8px rgba(0,0,0,0.4), 0 4px 20px rgba(255,255,255,0.1);
         }
         #loader .progress-bar {
-            width: 200px;
-            height: 8px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 10px;
+            width: 100%;
+            height: 14px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+            border-radius: 14px;
             overflow: hidden;
+            position: relative;
         }
         #loader .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #4CAF50, #8BC34A);
-            border-radius: 10px;
+            background: linear-gradient(90deg, #00ff88 0%, #00d4ff 50%, #a855f7 100%);
+            border-radius: 14px;
             transition: width 0.3s ease-out;
-            box-shadow: 0 0 10px rgba(76, 175, 80, 0.6);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.8), inset 0 2px 4px rgba(255,255,255,0.3);
+            animation: progressPulse 1.5s infinite;
+            position: relative;
+            overflow: hidden;
+        }
+        #loader .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+            animation: progressShimmer 2s infinite;
+        }
+        @keyframes progressPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 136, 0.8); }
+            50% { box-shadow: 0 0 30px rgba(0, 255, 136, 1), 0 0 50px rgba(0, 212, 255, 0.5); }
+        }
+        @keyframes progressShimmer {
+            0% { left: -100%; }
+            100% { left: 200%; }
         }
         #cta {
             display: none;
             position: absolute;
             inset: 0;
-            background: rgba(0, 0, 0, 0.92);
+            background: radial-gradient(ellipse at center, rgba(10,14,26,0.92) 0%, rgba(0,0,0,0.98) 100%);
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 24px;
+            gap: 32px;
             z-index: 100;
-            animation: fadeIn 0.3s ease-out;
+            animation: ctaFadeIn 0.5s ease-out;
+            backdrop-filter: blur(15px);
         }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        @keyframes ctaFadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
         }
         #cta .logo {
-            font-size: 48px;
+            font-size: 64px;
             font-weight: 900;
-            background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 50%, #CDDC39 100%);
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            letter-spacing: 5px;
-            filter: drop-shadow(0 4px 20px rgba(76, 175, 80, 0.4));
+            letter-spacing: 8px;
+            filter: drop-shadow(0 6px 30px rgba(255, 215, 0, 0.6));
+            animation: ctaLogoFloat 4s ease-in-out infinite;
+        }
+        @keyframes ctaLogoFloat {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-12px) scale(1.03); }
+        }
+        #cta .score-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding: 32px 48px;
+            background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,160,0,0.15));
+            border-radius: 30px;
+            border: 3px solid rgba(255,215,0,0.5);
+            box-shadow: 0 12px 40px rgba(255, 215, 0, 0.4), inset 0 4px 12px rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        #cta .score-panel::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: panelShine 4s infinite;
+        }
+        @keyframes panelShine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+        #cta .score-label {
+            color: rgba(255,255,255,0.7);
+            font-size: 18px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
         #cta .score-container {
             display: flex;
             align-items: center;
-            gap: 16px;
-            padding: 20px 32px;
-            background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,160,0,0.1));
-            border-radius: 20px;
-            border: 2px solid rgba(255,215,0,0.3);
+            gap: 24px;
         }
         #cta .score {
             color: #FFD700;
-            font-size: 64px;
+            font-size: 84px;
             font-weight: 900;
-            text-shadow: 0 4px 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.3);
-            animation: scoreGlow 1.5s ease-in-out infinite;
+            text-shadow:
+                0 4px 30px rgba(255, 215, 0, 0.8),
+                0 0 60px rgba(255, 215, 0, 0.5),
+                0 8px 0 rgba(180,140,0,0.3);
+            animation: scoreGlow 2s ease-in-out infinite;
+            font-family: 'Arial Black', sans-serif;
         }
         @keyframes scoreGlow {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            0%, 100% {
+                transform: scale(1);
+                filter: brightness(1) drop-shadow(0 0 20px rgba(255,215,0,0.6));
+            }
+            50% {
+                transform: scale(1.12);
+                filter: brightness(1.3) drop-shadow(0 0 40px rgba(255,215,0,0.9));
+            }
         }
         #cta .coin-icon {
-            width: 56px;
-            height: 56px;
+            width: 72px;
+            height: 72px;
             background: linear-gradient(135deg, #FFD700 0%, #FFA000 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 32px;
+            font-size: 42px;
             font-weight: bold;
-            color: #FFA000;
-            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.5);
-            animation: coinSpin 3s linear infinite;
+            color: #B8860B;
+            box-shadow:
+                0 10px 30px rgba(255, 215, 0, 0.7),
+                inset 0 4px 12px rgba(255,255,255,0.4),
+                inset 0 -4px 8px rgba(180,140,0,0.4);
+            animation: coinRotate 4s linear infinite;
+            position: relative;
         }
-        @keyframes coinSpin {
-            0%, 100% { transform: rotateY(0deg); }
-            50% { transform: rotateY(180deg); }
+        #cta .coin-icon::after {
+            content: '';
+            position: absolute;
+            top: 10%;
+            left: 15%;
+            width: 40%;
+            height: 40%;
+            background: radial-gradient(ellipse, rgba(255,255,255,0.6), transparent);
+            border-radius: 50%;
+        }
+        @keyframes coinRotate {
+            0%, 100% { transform: rotateY(0deg) scale(1); }
+            25% { transform: rotateY(90deg) scale(0.85); }
+            50% { transform: rotateY(180deg) scale(1); }
+            75% { transform: rotateY(270deg) scale(0.85); }
         }
         #cta .msg {
             color: #fff;
-            font-size: 24px;
-            font-weight: 600;
-            opacity: 0.95;
+            font-size: 28px;
+            font-weight: 700;
             text-align: center;
+            text-shadow: 0 3px 10px rgba(0,0,0,0.6);
+            margin-top: 8px;
         }
         #cta button {
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 50%, #388E3C 100%);
+            background: linear-gradient(135deg, #00ff88 0%, #00d4ff 50%, #a855f7 100%);
             color: #fff;
             border: none;
-            padding: 20px 64px;
-            font-size: 24px;
+            padding: 24px 72px;
+            font-size: 28px;
             font-weight: 900;
-            border-radius: 50px;
+            border-radius: 60px;
             cursor: pointer;
-            box-shadow: 0 10px 40px rgba(76, 175, 80, 0.5);
-            animation: ctaPulse 2s infinite ease-in-out;
+            box-shadow:
+                0 14px 56px rgba(0, 255, 136, 0.6),
+                inset 0 3px 10px rgba(255,255,255,0.3);
+            animation: ctaPulse 2.5s infinite ease-in-out;
             text-transform: uppercase;
             letter-spacing: 3px;
             position: relative;
             overflow: hidden;
+            border: 3px solid rgba(255,255,255,0.3);
         }
         #cta button::before {
             content: '';
@@ -168,8 +270,8 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
-            animation: buttonShine 3s infinite;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: buttonShine 3.5s infinite;
         }
         @keyframes buttonShine {
             0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
@@ -179,8 +281,14 @@
             transform: scale(0.96);
         }
         @keyframes ctaPulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 10px 40px rgba(76, 175, 80, 0.5); }
-            50% { transform: scale(1.08); box-shadow: 0 15px 60px rgba(76, 175, 80, 0.7); }
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 14px 56px rgba(0, 255, 136, 0.6);
+            }
+            50% {
+                transform: scale(1.12);
+                box-shadow: 0 20px 80px rgba(0, 255, 136, 0.9), 0 0 60px rgba(0, 212, 255, 0.5);
+            }
         }
         .hidden { display: none !important; }
     </style>
@@ -191,19 +299,24 @@
 
         <div id="loader">
             <div class="logo">G-ROLL</div>
-            <div class="progress-bar">
-                <div class="progress-fill" id="progress" style="width: 0%"></div>
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress" style="width: 0%"></div>
+                </div>
             </div>
         </div>
 
         <div id="cta">
             <div class="logo">G-ROLL</div>
-            <div class="score-container">
-                <span class="score" id="final-score">0</span>
-                <div class="coin-icon">$</div>
+            <div class="score-panel">
+                <div class="score-label">Your Score</div>
+                <div class="score-container">
+                    <span class="score" id="final-score">0</span>
+                    <div class="coin-icon">$</div>
+                </div>
             </div>
-            <div class="msg">Experience the full adventure!</div>
-            <button onclick="handleCTA()">Download Now</button>
+            <div class="msg">Download to unlock all levels!</div>
+            <button onclick="handleCTA()">Play Full Game</button>
         </div>
     </div>
 
@@ -211,80 +324,50 @@
     (function() {
         'use strict';
 
-        // ============================================
-        // EASING FUNCTIONS
-        // ============================================
         const Easing = {
-            linear: t => t,
-            easeInQuad: t => t * t,
             easeOutQuad: t => t * (2 - t),
-            easeInOutQuad: t => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t,
-            easeInCubic: t => t * t * t,
             easeOutCubic: t => (--t) * t * t + 1,
             easeInOutCubic: t => t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1,
             easeOutElastic: t => {
                 const c4 = (2 * Math.PI) / 3;
                 return t === 0 ? 0 : t === 1 ? 1 : Math.pow(2, -10 * t) * Math.sin((t * 10 - 0.75) * c4) + 1;
             },
-            easeOutBounce: t => {
-                const n1 = 7.5625;
-                const d1 = 2.75;
-                if (t < 1 / d1) return n1 * t * t;
-                else if (t < 2 / d1) return n1 * (t -= 1.5 / d1) * t + 0.75;
-                else if (t < 2.5 / d1) return n1 * (t -= 2.25 / d1) * t + 0.9375;
-                else return n1 * (t -= 2.625 / d1) * t + 0.984375;
-            },
-            easeInOutBack: t => {
+            easeOutBack: t => {
                 const c1 = 1.70158;
-                const c2 = c1 * 1.525;
-                return t < 0.5
-                    ? (Math.pow(2 * t, 2) * ((c2 + 1) * 2 * t - c2)) / 2
-                    : (Math.pow(2 * t - 2, 2) * ((c2 + 1) * (t * 2 - 2) + c2) + 2) / 2;
+                const c3 = c1 + 1;
+                return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
             }
         };
 
-        // ============================================
-        // CONFIGURATION
-        // ============================================
         const CFG = {
             WIDTH: 360,
             HEIGHT: 640,
             PIXEL_RATIO: Math.min(window.devicePixelRatio || 1, 2),
-
             CELL_SIZE: 40,
             GRID_WIDTH: 9,
             PLAYER_START: { x: 4, y: 3 },
-
             PLAYER_SPEED: 6,
             CAMERA_SPEED: 3.5,
             SWIPE_THRESHOLD: 25,
-
             GAME_DURATION: 15000,
             TUTORIAL_FADE_SPEED: 2,
-
-            // Enhanced colors
             COLORS: {
-                BG_TOP: '#1a1a2e',
-                BG_MID: '#16213e',
-                BG_BOTTOM: '#0f3460',
-                PLAYER: ['#4ade80', '#22c55e', '#16a34a'],
-                COIN: ['#fbbf24', '#f59e0b', '#d97706'],
-                WALL: ['#ef4444', '#dc2626', '#991b1b'],
+                BG_TOP: '#0a0e1a',
+                BG_MID: '#1a2332',
+                BG_BOTTOM: '#0f1420',
+                PLAYER: ['#00ff88', '#00d4ff', '#0088ff'],
+                COIN: ['#ffd700', '#ffb700', '#ff8c00'],
+                WALL: ['#ff3366', '#ff1744', '#c41c3b'],
                 TEXT: '#FFFFFF',
-                GRID: 'rgba(255,255,255,0.06)',
-                PARTICLE: ['#fbbf24', '#fb923c', '#f472b6']
+                GRID: 'rgba(0, 255, 136, 0.08)',
+                PARTICLE: ['#ffd700', '#00ff88', '#00d4ff', '#a855f7']
             },
-
             PLAYER_RADIUS: 0.4,
             COIN_RADIUS: 0.35,
-
             IOS_URL: 'https://apps.apple.com/app/g-roll/id6504637900',
             ANDROID_URL: 'https://play.google.com/store/apps/details?id=com.wikzllc.groll'
         };
 
-        // ============================================
-        // LEVEL DATA
-        // ============================================
         const LEVEL = {
             coins: [
                 { x: 4, y: 6 }, { x: 4, y: 9 }, { x: 3, y: 12 }, { x: 5, y: 12 }, { x: 4, y: 15 },
@@ -300,16 +383,12 @@
             ]
         };
 
-        // ============================================
-        // PARTICLE SYSTEM
-        // ============================================
         const ParticleSystem = {
             particles: [],
             pool: [],
 
             init() {
-                // Pre-create particle pool
-                for (let i = 0; i < 100; i++) {
+                for (let i = 0; i < 200; i++) {
                     this.pool.push(this.createParticle());
                 }
             },
@@ -319,17 +398,18 @@
                     x: 0, y: 0,
                     vx: 0, vy: 0,
                     life: 0, maxLife: 1,
-                    size: 4,
+                    size: 4, initialSize: 4,
                     color: '#fff',
                     alpha: 1,
                     gravity: 0,
+                    rotation: 0,
+                    rotationSpeed: 0,
                     active: false
                 };
             },
 
             spawn(x, y, config = {}) {
                 const p = this.pool.pop() || this.createParticle();
-
                 p.x = x;
                 p.y = y;
                 p.vx = (config.vx || 0) + (Math.random() - 0.5) * (config.spread || 2);
@@ -337,18 +417,20 @@
                 p.life = 0;
                 p.maxLife = config.life || 1;
                 p.size = config.size || 4;
-                p.color = config.color || '#fff';
+                p.initialSize = p.size;
+                p.color = Array.isArray(config.color) ? config.color[Math.floor(Math.random() * config.color.length)] : (config.color || '#fff');
                 p.alpha = 1;
                 p.gravity = config.gravity || 0;
+                p.rotation = Math.random() * Math.PI * 2;
+                p.rotationSpeed = (Math.random() - 0.5) * 0.2;
                 p.active = true;
-
                 this.particles.push(p);
             },
 
             spawnBurst(x, y, count, config) {
                 for (let i = 0; i < count; i++) {
-                    const angle = (Math.PI * 2 * i) / count;
-                    const speed = config.speed || 3;
+                    const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.3;
+                    const speed = (config.speed || 3) * (0.8 + Math.random() * 0.4);
                     this.spawn(x, y, {
                         ...config,
                         vx: Math.cos(angle) * speed,
@@ -360,7 +442,6 @@
             update(dt) {
                 for (let i = this.particles.length - 1; i >= 0; i--) {
                     const p = this.particles[i];
-
                     p.life += dt;
                     if (p.life >= p.maxLife) {
                         p.active = false;
@@ -368,38 +449,43 @@
                         this.particles.splice(i, 1);
                         continue;
                     }
-
                     p.x += p.vx * dt * 60;
                     p.y += p.vy * dt * 60;
                     p.vy += p.gravity * dt * 60;
-
+                    p.rotation += p.rotationSpeed;
                     const progress = p.life / p.maxLife;
-                    p.alpha = 1 - Easing.easeInQuad(progress);
-                    p.size = (config.size || 4) * (1 - Easing.easeOutQuad(progress) * 0.5);
+                    p.alpha = 1 - Easing.easeOutQuad(progress);
+                    p.size = p.initialSize * (1 - Easing.easeOutCubic(progress) * 0.3);
                 }
             },
 
             draw(ctx) {
                 this.particles.forEach(p => {
+                    ctx.save();
                     ctx.globalAlpha = p.alpha;
-                    ctx.fillStyle = p.color;
-                    ctx.shadowBlur = 10;
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.rotation);
+
+                    const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, p.size);
+                    gradient.addColorStop(0, p.color);
+                    gradient.addColorStop(0.5, p.color + 'aa');
+                    gradient.addColorStop(1, p.color + '00');
+
+                    ctx.fillStyle = gradient;
+                    ctx.shadowBlur = p.size * 2;
                     ctx.shadowColor = p.color;
                     ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.arc(0, 0, p.size, 0, Math.PI * 2);
                     ctx.fill();
+
+                    ctx.restore();
                 });
-                ctx.globalAlpha = 1;
-                ctx.shadowBlur = 0;
             }
         };
 
-        // ============================================
-        // TRAIL SYSTEM
-        // ============================================
         const TrailSystem = {
             points: [],
-            maxPoints: 15,
+            maxPoints: 25,
 
             add(x, y) {
                 this.points.push({ x, y, life: 1 });
@@ -409,15 +495,12 @@
             },
 
             update(dt) {
-                this.points.forEach(p => {
-                    p.life -= dt * 2.5;
-                });
+                this.points.forEach(p => p.life -= dt * 1.8);
                 this.points = this.points.filter(p => p.life > 0);
             },
 
-            draw(ctx, camOffset) {
+            draw(ctx) {
                 if (this.points.length < 2) return;
-
                 ctx.save();
                 ctx.lineCap = 'round';
                 ctx.lineJoin = 'round';
@@ -425,32 +508,27 @@
                 for (let i = 1; i < this.points.length; i++) {
                     const p1 = this.points[i - 1];
                     const p2 = this.points[i];
-
-                    const alpha = p2.life * 0.6;
-                    const width = p2.life * 20;
+                    const alpha = p2.life * 0.8;
+                    const width = p2.life * 30;
 
                     const gradient = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
-                    gradient.addColorStop(0, `rgba(76, 222, 128, ${alpha * 0.5})`);
-                    gradient.addColorStop(1, `rgba(74, 222, 128, ${alpha})`);
+                    gradient.addColorStop(0, `rgba(0, 255, 136, ${alpha * 0.3})`);
+                    gradient.addColorStop(0.5, `rgba(0, 212, 255, ${alpha * 0.6})`);
+                    gradient.addColorStop(1, `rgba(168, 85, 247, ${alpha})`);
 
                     ctx.strokeStyle = gradient;
                     ctx.lineWidth = width;
-                    ctx.shadowBlur = 15;
-                    ctx.shadowColor = 'rgba(76, 222, 128, 0.5)';
-
+                    ctx.shadowBlur = 25;
+                    ctx.shadowColor = 'rgba(0, 212, 255, 0.7)';
                     ctx.beginPath();
                     ctx.moveTo(p1.x, p1.y);
                     ctx.lineTo(p2.x, p2.y);
                     ctx.stroke();
                 }
-
                 ctx.restore();
             }
         };
 
-        // ============================================
-        // ADVANCED SPRITE CACHE
-        // ============================================
         const SpriteCache = {
             player: null,
             coin: null,
@@ -458,22 +536,22 @@
             coinShadow: null,
 
             init() {
-                this.player = this.createAdvancedBall(CFG.CELL_SIZE * 0.85, CFG.COLORS.PLAYER);
-                this.coin = this.createAdvancedCoin(CFG.CELL_SIZE * 0.55);
+                this.player = this.createUltraBall(CFG.CELL_SIZE * 0.85, CFG.COLORS.PLAYER);
+                this.coin = this.createUltraCoin(CFG.CELL_SIZE * 0.55);
                 this.playerShadow = this.createShadow(CFG.CELL_SIZE * 0.85);
                 this.coinShadow = this.createShadow(CFG.CELL_SIZE * 0.55);
             },
 
             createShadow(size) {
                 const canvas = document.createElement('canvas');
-                const s = size * CFG.PIXEL_RATIO * 1.2;
+                const s = size * CFG.PIXEL_RATIO * 1.4;
                 canvas.width = s;
                 canvas.height = s / 2;
                 const ctx = canvas.getContext('2d');
 
                 const gradient = ctx.createRadialGradient(s / 2, canvas.height / 2, 0, s / 2, canvas.height / 2, s / 2);
-                gradient.addColorStop(0, 'rgba(0, 0, 0, 0.4)');
-                gradient.addColorStop(0.5, 'rgba(0, 0, 0, 0.2)');
+                gradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
+                gradient.addColorStop(0.3, 'rgba(0, 0, 0, 0.3)');
                 gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
                 ctx.fillStyle = gradient;
@@ -484,116 +562,130 @@
                 return canvas;
             },
 
-            createAdvancedBall(size, colors) {
+            createUltraBall(size, colors) {
                 const canvas = document.createElement('canvas');
                 const s = size * CFG.PIXEL_RATIO;
                 canvas.width = s;
                 canvas.height = s;
                 const ctx = canvas.getContext('2d');
 
-                // Main gradient (3-color for depth)
-                const mainGradient = ctx.createRadialGradient(
-                    s * 0.35, s * 0.35, 0,
-                    s * 0.5, s * 0.5, s * 0.5
-                );
+                // Base sphere
+                const mainGradient = ctx.createRadialGradient(s * 0.3, s * 0.25, 0, s * 0.5, s * 0.5, s * 0.5);
                 mainGradient.addColorStop(0, colors[0]);
-                mainGradient.addColorStop(0.6, colors[1]);
+                mainGradient.addColorStop(0.4, colors[1]);
                 mainGradient.addColorStop(1, colors[2]);
 
-                // Main circle
                 ctx.beginPath();
-                ctx.arc(s / 2, s / 2, s / 2 - 2, 0, Math.PI * 2);
+                ctx.arc(s / 2, s / 2, s / 2 - 4, 0, Math.PI * 2);
                 ctx.fillStyle = mainGradient;
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = colors[1];
                 ctx.fill();
 
-                // Specular highlight
-                const highlightGradient = ctx.createRadialGradient(
-                    s * 0.32, s * 0.28, 0,
-                    s * 0.32, s * 0.28, s * 0.25
-                );
-                highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
-                highlightGradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.4)');
-                highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                // Large specular highlight
+                const highlight1 = ctx.createRadialGradient(s * 0.28, s * 0.22, 0, s * 0.28, s * 0.22, s * 0.32);
+                highlight1.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+                highlight1.addColorStop(0.3, 'rgba(255, 255, 255, 0.6)');
+                highlight1.addColorStop(1, 'rgba(255, 255, 255, 0)');
 
+                ctx.shadowBlur = 0;
                 ctx.beginPath();
-                ctx.arc(s * 0.32, s * 0.28, s * 0.25, 0, Math.PI * 2);
-                ctx.fillStyle = highlightGradient;
+                ctx.arc(s * 0.28, s * 0.22, s * 0.32, 0, Math.PI * 2);
+                ctx.fillStyle = highlight1;
                 ctx.fill();
 
                 // Secondary highlight
                 ctx.beginPath();
-                ctx.ellipse(s * 0.65, s * 0.65, s * 0.12, s * 0.08, Math.PI / 4, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.ellipse(s * 0.7, s * 0.7, s * 0.18, s * 0.12, Math.PI / 4, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.fill();
+
+                // Rim light effect
+                const rimGradient = ctx.createRadialGradient(s / 2, s / 2, s * 0.35, s / 2, s / 2, s * 0.5);
+                rimGradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
+                rimGradient.addColorStop(0.85, 'rgba(255, 255, 255, 0.2)');
+                rimGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+                ctx.beginPath();
+                ctx.arc(s / 2, s / 2, s / 2 - 4, 0, Math.PI * 2);
+                ctx.fillStyle = rimGradient;
+                ctx.fill();
+
+                // Gloss overlay
+                ctx.beginPath();
+                ctx.ellipse(s * 0.35, s * 0.28, s * 0.22, s * 0.14, -0.3, 0, Math.PI * 2);
+                const glossGradient = ctx.createRadialGradient(s * 0.35, s * 0.28, 0, s * 0.35, s * 0.28, s * 0.22);
+                glossGradient.addColorStop(0, 'rgba(255, 255, 255, 0.5)');
+                glossGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                ctx.fillStyle = glossGradient;
                 ctx.fill();
 
                 return canvas;
             },
 
-            createAdvancedCoin(size) {
+            createUltraCoin(size) {
                 const canvas = document.createElement('canvas');
                 const s = size * CFG.PIXEL_RATIO;
                 canvas.width = s;
                 canvas.height = s;
                 const ctx = canvas.getContext('2d');
 
-                // Outer rim (3D effect)
-                const rimGradient = ctx.createRadialGradient(
-                    s / 2, s / 2, s * 0.35,
-                    s / 2, s / 2, s / 2
-                );
-                rimGradient.addColorStop(0, '#d97706');
-                rimGradient.addColorStop(0.5, '#f59e0b');
-                rimGradient.addColorStop(1, '#b45309');
+                // Outer ring - metallic gold
+                const outerGradient = ctx.createRadialGradient(s / 2, s / 2, s * 0.25, s / 2, s / 2, s / 2);
+                outerGradient.addColorStop(0, '#8b6914');
+                outerGradient.addColorStop(0.3, '#ffd700');
+                outerGradient.addColorStop(0.6, '#daa520');
+                outerGradient.addColorStop(0.85, '#ffd700');
+                outerGradient.addColorStop(1, '#8b6914');
 
                 ctx.beginPath();
-                ctx.arc(s / 2, s / 2, s / 2 - 2, 0, Math.PI * 2);
-                ctx.fillStyle = rimGradient;
+                ctx.arc(s / 2, s / 2, s / 2 - 3, 0, Math.PI * 2);
+                ctx.fillStyle = outerGradient;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = '#ffd700';
                 ctx.fill();
 
-                // Inner coin face
-                const faceGradient = ctx.createRadialGradient(
-                    s * 0.4, s * 0.4, 0,
-                    s / 2, s / 2, s * 0.42
-                );
-                faceGradient.addColorStop(0, '#fef08a');
-                faceGradient.addColorStop(0.4, '#fbbf24');
-                faceGradient.addColorStop(1, '#f59e0b');
+                // Inner face - bright gold
+                const faceGradient = ctx.createRadialGradient(s * 0.32, s * 0.32, 0, s / 2, s / 2, s * 0.46);
+                faceGradient.addColorStop(0, '#fffacd');
+                faceGradient.addColorStop(0.2, '#ffd700');
+                faceGradient.addColorStop(0.6, '#ffb700');
+                faceGradient.addColorStop(1, '#ff8c00');
 
+                ctx.shadowBlur = 0;
                 ctx.beginPath();
-                ctx.arc(s / 2, s / 2, s * 0.42, 0, Math.PI * 2);
+                ctx.arc(s / 2, s / 2, s * 0.46, 0, Math.PI * 2);
                 ctx.fillStyle = faceGradient;
                 ctx.fill();
 
-                // Highlight
-                const highlightGradient = ctx.createRadialGradient(
-                    s * 0.35, s * 0.32, 0,
-                    s * 0.35, s * 0.32, s * 0.2
-                );
-                highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+                // Specular highlight
+                const highlightGradient = ctx.createRadialGradient(s * 0.3, s * 0.25, 0, s * 0.3, s * 0.25, s * 0.25);
+                highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+                highlightGradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.4)');
                 highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
 
                 ctx.beginPath();
-                ctx.arc(s * 0.35, s * 0.32, s * 0.2, 0, Math.PI * 2);
+                ctx.arc(s * 0.3, s * 0.25, s * 0.25, 0, Math.PI * 2);
                 ctx.fillStyle = highlightGradient;
                 ctx.fill();
 
-                // Dollar sign
-                ctx.fillStyle = '#d97706';
-                ctx.strokeStyle = '#d97706';
-                ctx.lineWidth = s * 0.03;
-                ctx.font = `bold ${s * 0.5}px Arial`;
+                // Dollar sign - embossed effect
+                ctx.shadowBlur = 2;
+                ctx.shadowColor = 'rgba(0,0,0,0.5)';
+                ctx.shadowOffsetY = 2;
+                ctx.fillStyle = '#b8860b';
+                ctx.strokeStyle = '#8b6914';
+                ctx.lineWidth = s * 0.025;
+                ctx.font = `900 ${s * 0.54}px Arial`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.strokeText('$', s / 2, s / 2 + s * 0.03);
-                ctx.fillText('$', s / 2, s / 2 + s * 0.03);
+                ctx.strokeText('$', s / 2, s / 2 + s * 0.04);
+                ctx.fillText('$', s / 2, s / 2 + s * 0.04);
 
                 return canvas;
             }
         };
 
-        // ============================================
-        // INPUT HANDLER
-        // ============================================
         const Input = {
             startPos: null,
             pendingDir: null,
@@ -645,9 +737,6 @@
             }
         };
 
-        // ============================================
-        // PLAYER
-        // ============================================
         const Player = {
             gridX: 4,
             gridY: 3,
@@ -679,14 +768,13 @@
                     this.direction = newDir;
                     this.squashTime = 0.15;
 
-                    // Direction change particle burst
                     const pos = this.getWorldPos();
                     const camOffset = Camera.getOffset();
                     ParticleSystem.spawnBurst(
                         pos.x,
                         CFG.HEIGHT - (pos.y - camOffset.y),
-                        8,
-                        { color: CFG.COLORS.PLAYER[0], size: 3, life: 0.5, speed: 2, spread: 1 }
+                        12,
+                        { color: CFG.COLORS.PARTICLE, size: 5, life: 0.7, speed: 3, spread: 2 }
                     );
                 }
 
@@ -708,9 +796,8 @@
                     this.squashTime = Math.max(0, this.squashTime - dt);
                 }
 
-                // Trail effect
                 this.trailTimer += dt;
-                if (this.trailTimer > 0.05) {
+                if (this.trailTimer > 0.035) {
                     const pos = this.getWorldPos();
                     const camOffset = Camera.getOffset();
                     TrailSystem.add(pos.x, CFG.HEIGHT - (pos.y - camOffset.y));
@@ -726,9 +813,6 @@
             }
         };
 
-        // ============================================
-        // CAMERA
-        // ============================================
         const Camera = {
             y: 0,
             shakeAmount: 0,
@@ -748,7 +832,7 @@
                 this.y += CFG.CAMERA_SPEED * dt;
 
                 if (this.shakeAmount > 0) {
-                    this.shakeAmount *= 0.9;
+                    this.shakeAmount *= 0.86;
                     if (this.shakeAmount < 0.5) this.shakeAmount = 0;
 
                     this.shakeX = (Math.random() - 0.5) * this.shakeAmount;
@@ -760,7 +844,7 @@
             },
 
             shake(intensity = 15) {
-                this.shakeAmount = intensity;
+                this.shakeAmount = Math.max(this.shakeAmount, intensity);
             },
 
             getOffset() {
@@ -771,9 +855,6 @@
             }
         };
 
-        // ============================================
-        // ENTITIES
-        // ============================================
         const Entities = {
             coins: [],
             walls: [],
@@ -807,12 +888,11 @@
 
                 this.coins.forEach(coin => {
                     if (coin.collected) {
-                        coin.scale += dt * 4;
-                        coin.alpha -= dt * 3;
+                        coin.scale += dt * 6;
+                        coin.alpha -= dt * 2.2;
                     } else {
-                        // Idle bob animation
-                        coin.scale = 1 + Math.sin(time * 3 + coin.bobOffset) * 0.15;
-                        coin.rotation += dt * 1.5;
+                        coin.scale = 1 + Math.sin(time * 4 + coin.bobOffset) * 0.2;
+                        coin.rotation += dt * 2;
                     }
                 });
 
@@ -820,9 +900,6 @@
             }
         };
 
-        // ============================================
-        // COLLISION
-        // ============================================
         const Collision = {
             check() {
                 if (Game.state !== 'playing') return;
@@ -858,49 +935,43 @@
             collectCoin(coin) {
                 coin.collected = true;
                 Game.score++;
-                Game.combo++;
                 UI.addCoinFX(coin.x, coin.y);
 
-                // Particle burst
                 const worldX = (coin.x - CFG.GRID_WIDTH / 2 + 0.5) * CFG.CELL_SIZE + CFG.WIDTH / 2;
                 const camOffset = Camera.getOffset();
                 const screenY = CFG.HEIGHT - (coin.y * CFG.CELL_SIZE - camOffset.y);
 
-                ParticleSystem.spawnBurst(worldX, screenY, 12, {
-                    color: CFG.COLORS.COIN[0],
-                    size: 5,
-                    life: 0.8,
-                    speed: 4,
-                    spread: 2,
-                    gravity: 0.15
+                ParticleSystem.spawnBurst(worldX, screenY, 20, {
+                    color: CFG.COLORS.COIN,
+                    size: 7,
+                    life: 1.2,
+                    speed: 6,
+                    spread: 3,
+                    gravity: 0.2
                 });
 
-                Camera.shake(5);
+                Camera.shake(7);
             },
 
             hitWall() {
                 if (Game.state !== 'playing') return;
                 Game.state = 'gameover';
-                Camera.shake(25);
-                Player.squashTime = 0.4;
+                Camera.shake(35);
+                Player.squashTime = 0.5;
 
-                // Impact particles
                 const pos = Player.getWorldPos();
                 const camOffset = Camera.getOffset();
                 ParticleSystem.spawnBurst(
                     pos.x,
                     CFG.HEIGHT - (pos.y - camOffset.y),
-                    20,
-                    { color: '#ef4444', size: 6, life: 1, speed: 5, spread: 3, gravity: 0.2 }
+                    30,
+                    { color: CFG.COLORS.WALL, size: 8, life: 1.4, speed: 7, spread: 4, gravity: 0.25 }
                 );
 
                 setTimeout(() => Game.showCTA(), 1200);
             }
         };
 
-        // ============================================
-        // UI
-        // ============================================
         const UI = {
             tutorialAlpha: 1,
             coinFX: [],
@@ -914,7 +985,7 @@
                     x: worldX,
                     y: screenY,
                     alpha: 1,
-                    scale: 0.5,
+                    scale: 0.3,
                     life: 0
                 });
             },
@@ -926,75 +997,95 @@
 
                 this.coinFX = this.coinFX.filter(fx => {
                     fx.life += dt;
-                    fx.y -= dt * 80;
-                    fx.alpha = 1 - Easing.easeInQuad(fx.life / 0.8);
-                    fx.scale = 0.5 + Easing.easeOutBack(Math.min(fx.life / 0.3, 1)) * 0.5;
-                    return fx.life < 0.8;
+                    fx.y -= dt * 100;
+                    fx.alpha = 1 - Easing.easeOutQuad(fx.life / 1);
+                    fx.scale = 0.3 + Easing.easeOutBack(Math.min(fx.life / 0.4, 1)) * 0.9;
+                    return fx.life < 1;
                 });
             },
 
             draw(ctx) {
-                // Score with glow
+                // Modern HUD panel
                 ctx.save();
-                ctx.fillStyle = CFG.COLORS.TEXT;
-                ctx.font = 'bold 32px Arial';
-                ctx.textAlign = 'left';
-                ctx.shadowColor = 'rgba(74, 222, 128, 0.6)';
-                ctx.shadowBlur = 10;
-                ctx.shadowOffsetY = 2;
 
-                const scoreX = 24;
-                const scoreY = 48;
-                ctx.fillText(Game.score.toString(), scoreX, scoreY);
+                // Score panel background
+                const panelGradient = ctx.createLinearGradient(0, 20, 0, 100);
+                panelGradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
+                panelGradient.addColorStop(1, 'rgba(0, 0, 0, 0.3)');
+
+                ctx.fillStyle = panelGradient;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = 'rgba(0, 255, 136, 0.3)';
+                ctx.beginPath();
+                ctx.roundRect(20, 20, 140, 70, 15);
+                ctx.fill();
+
+                // Score
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = 'rgba(0, 255, 136, 0.8)';
+                ctx.fillStyle = '#00ff88';
+                ctx.font = 'bold 42px Arial';
+                ctx.textAlign = 'left';
+                ctx.fillText(Game.score.toString(), 35, 62);
 
                 // Coin icon
-                const iconSize = 32;
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = 'rgba(251, 191, 36, 0.6)';
-                ctx.drawImage(SpriteCache.coin, scoreX + 50, scoreY - 24, iconSize, iconSize);
+                const iconSize = 38;
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = 'rgba(255, 215, 0, 0.8)';
+                ctx.drawImage(SpriteCache.coin, 95, 40, iconSize, iconSize);
                 ctx.restore();
 
-                // Enhanced timer bar
+                // Modern progress bar
                 const progress = Math.max(0, (CFG.GAME_DURATION - Game.elapsed) / CFG.GAME_DURATION);
-                const barX = 24;
-                const barY = 68;
-                const barW = CFG.WIDTH - 48;
-                const barH = 10;
+                const barX = 20;
+                const barY = 100;
+                const barW = CFG.WIDTH - 40;
+                const barH = 12;
 
                 // Bar background
-                ctx.fillStyle = 'rgba(255,255,255,0.15)';
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                ctx.shadowBlur = 0;
                 ctx.beginPath();
-                ctx.roundRect(barX, barY, barW, barH, 5);
+                ctx.roundRect(barX, barY, barW, barH, 6);
                 ctx.fill();
 
                 // Bar fill with gradient
-                const gradient = ctx.createLinearGradient(barX, 0, barX + barW * progress, 0);
-                gradient.addColorStop(0, '#4ade80');
-                gradient.addColorStop(0.5, '#22c55e');
-                gradient.addColorStop(1, '#16a34a');
+                const barGradient = ctx.createLinearGradient(barX, 0, barX + barW * progress, 0);
+                barGradient.addColorStop(0, '#00ff88');
+                barGradient.addColorStop(0.5, '#00d4ff');
+                barGradient.addColorStop(1, '#a855f7');
 
-                ctx.fillStyle = gradient;
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = 'rgba(74, 222, 128, 0.5)';
+                ctx.fillStyle = barGradient;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = 'rgba(0, 255, 136, 0.7)';
                 ctx.beginPath();
-                ctx.roundRect(barX, barY, barW * progress, barH, 5);
+                ctx.roundRect(barX, barY, barW * progress, barH, 6);
                 ctx.fill();
                 ctx.shadowBlur = 0;
 
-                // Coin FX
+                // Coin FX with enhanced glow
                 this.coinFX.forEach(fx => {
                     ctx.save();
                     ctx.globalAlpha = fx.alpha;
-                    ctx.fillStyle = CFG.COLORS.COIN[0];
-                    ctx.font = `bold ${24 * fx.scale}px Arial`;
+
+                    const textGradient = ctx.createLinearGradient(fx.x - 30, fx.y, fx.x + 30, fx.y);
+                    textGradient.addColorStop(0, '#ffd700');
+                    textGradient.addColorStop(0.5, '#fff');
+                    textGradient.addColorStop(1, '#ffd700');
+
+                    ctx.fillStyle = textGradient;
+                    ctx.font = `900 ${32 * fx.scale}px Arial`;
                     ctx.textAlign = 'center';
-                    ctx.shadowBlur = 8;
-                    ctx.shadowColor = CFG.COLORS.COIN[0];
+                    ctx.shadowBlur = 12;
+                    ctx.shadowColor = '#ffd700';
+                    ctx.strokeStyle = 'rgba(139, 105, 20, 0.5)';
+                    ctx.lineWidth = 2;
+                    ctx.strokeText('+1', fx.x, fx.y);
                     ctx.fillText('+1', fx.x, fx.y);
                     ctx.restore();
                 });
 
-                // Tutorial
+                // Tutorial with modern design
                 if (this.tutorialAlpha > 0 && (Game.state === 'tutorial' || Game.state === 'loading')) {
                     this.drawTutorial(ctx);
                 }
@@ -1003,52 +1094,51 @@
             drawTutorial(ctx) {
                 const alpha = this.tutorialAlpha;
 
-                ctx.fillStyle = `rgba(0,0,0,${0.5 * alpha})`;
+                ctx.fillStyle = `rgba(0,0,0,${0.6 * alpha})`;
                 ctx.fillRect(0, 0, CFG.WIDTH, CFG.HEIGHT);
 
                 ctx.globalAlpha = alpha;
 
-                // Title with gradient
-                const titleGradient = ctx.createLinearGradient(0, CFG.HEIGHT / 2 - 80, 0, CFG.HEIGHT / 2 - 40);
-                titleGradient.addColorStop(0, '#4ade80');
-                titleGradient.addColorStop(1, '#22c55e');
+                // Modern title with gradient
+                const titleGradient = ctx.createLinearGradient(0, CFG.HEIGHT / 2 - 90, 0, CFG.HEIGHT / 2 - 40);
+                titleGradient.addColorStop(0, '#00ff88');
+                titleGradient.addColorStop(0.5, '#00d4ff');
+                titleGradient.addColorStop(1, '#a855f7');
 
                 ctx.fillStyle = titleGradient;
-                ctx.font = 'bold 36px Arial';
+                ctx.font = 'bold 44px Arial';
                 ctx.textAlign = 'center';
-                ctx.shadowColor = 'rgba(74, 222, 128, 0.8)';
-                ctx.shadowBlur = 20;
-                ctx.fillText('Swipe to Move', CFG.WIDTH / 2, CFG.HEIGHT / 2 - 60);
+                ctx.shadowColor = 'rgba(0, 212, 255, 0.9)';
+                ctx.shadowBlur = 30;
+                ctx.fillText('Swipe to Move', CFG.WIDTH / 2, CFG.HEIGHT / 2 - 70);
 
-                // Animated hand
+                // Animated hand with glow
                 const time = performance.now() / 1000;
-                const handX = CFG.WIDTH / 2 + Math.sin(time * 2.5) * 60;
-                const handY = CFG.HEIGHT / 2 + 20;
+                const handX = CFG.WIDTH / 2 + Math.sin(time * 2.5) * 70;
+                const handY = CFG.HEIGHT / 2 + 30;
 
-                ctx.strokeStyle = `rgba(255,255,255,${0.6 * alpha})`;
-                ctx.lineWidth = 4;
+                ctx.strokeStyle = `rgba(255,255,255,${0.7 * alpha})`;
+                ctx.lineWidth = 6;
                 ctx.lineCap = 'round';
-                ctx.setLineDash([12, 8]);
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = 'rgba(255,255,255,0.5)';
+                ctx.setLineDash([16, 12]);
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = 'rgba(0, 212, 255, 0.8)';
                 ctx.beginPath();
-                ctx.moveTo(CFG.WIDTH / 2 - 70, handY);
-                ctx.lineTo(CFG.WIDTH / 2 + 70, handY);
+                ctx.moveTo(CFG.WIDTH / 2 - 80, handY);
+                ctx.lineTo(CFG.WIDTH / 2 + 80, handY);
                 ctx.stroke();
                 ctx.setLineDash([]);
 
-                ctx.font = '60px Arial';
-                ctx.shadowBlur = 15;
-                ctx.fillText('☝️', handX, handY + 10);
+                ctx.font = '72px Arial';
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = 'rgba(255, 215, 0, 0.8)';
+                ctx.fillText('☝️', handX, handY + 15);
 
                 ctx.shadowBlur = 0;
                 ctx.globalAlpha = 1;
             }
         };
 
-        // ============================================
-        // RENDERER
-        // ============================================
         const Render = {
             ctx: null,
             canvas: null,
@@ -1060,25 +1150,46 @@
                 this.canvas.style.width = '100%';
                 this.canvas.style.height = '100%';
 
-                this.ctx = this.canvas.getContext('2d', { alpha: false });
+                this.ctx = this.canvas.getContext('2d', { alpha: false, desynchronized: true });
                 this.ctx.scale(CFG.PIXEL_RATIO, CFG.PIXEL_RATIO);
+                this.ctx.imageSmoothingEnabled = true;
+                this.ctx.imageSmoothingQuality = 'high';
             },
 
             draw() {
                 const ctx = this.ctx;
                 const camOffset = Camera.getOffset();
 
-                // Enhanced background with 3 colors
-                const bgGradient = ctx.createLinearGradient(0, 0, 0, CFG.HEIGHT);
-                bgGradient.addColorStop(0, CFG.COLORS.BG_TOP);
-                bgGradient.addColorStop(0.5, CFG.COLORS.BG_MID);
+                // Enhanced background with stars
+                const bgGradient = ctx.createRadialGradient(CFG.WIDTH / 2, CFG.HEIGHT / 2, 0, CFG.WIDTH / 2, CFG.HEIGHT / 2, CFG.HEIGHT);
+                bgGradient.addColorStop(0, CFG.COLORS.BG_MID);
+                bgGradient.addColorStop(0.7, CFG.COLORS.BG_TOP);
                 bgGradient.addColorStop(1, CFG.COLORS.BG_BOTTOM);
                 ctx.fillStyle = bgGradient;
                 ctx.fillRect(0, 0, CFG.WIDTH, CFG.HEIGHT);
 
-                // Subtle grid
+                // Animated stars
+                const time = performance.now() / 1000;
+                for (let i = 0; i < 30; i++) {
+                    const x = (i * 73) % CFG.WIDTH;
+                    const y = (i * 97 + camOffset.y * 0.3) % CFG.HEIGHT;
+                    const size = 1 + (i % 3);
+                    const twinkle = Math.sin(time * 2 + i) * 0.5 + 0.5;
+
+                    ctx.globalAlpha = twinkle * 0.6;
+                    ctx.fillStyle = i % 3 === 0 ? '#00d4ff' : '#fff';
+                    ctx.shadowBlur = size * 3;
+                    ctx.shadowColor = ctx.fillStyle;
+                    ctx.beginPath();
+                    ctx.arc(x, y, size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1;
+                ctx.shadowBlur = 0;
+
+                // Modern grid
                 ctx.strokeStyle = CFG.COLORS.GRID;
-                ctx.lineWidth = 1;
+                ctx.lineWidth = 1.5;
 
                 for (let i = 0; i <= CFG.GRID_WIDTH; i++) {
                     const x = (i - CFG.GRID_WIDTH / 2 + 0.5) * CFG.CELL_SIZE + CFG.WIDTH / 2;
@@ -1100,34 +1211,24 @@
                 ctx.save();
                 ctx.translate(camOffset.x, 0);
 
-                // Draw shadows first
                 this.drawShadows(ctx, camOffset);
-
-                // Draw entities
                 this.drawWalls(ctx, camOffset);
                 this.drawCoins(ctx, camOffset);
-
-                // Trail behind player
-                TrailSystem.draw(ctx, camOffset);
-
+                TrailSystem.draw(ctx);
                 this.drawPlayer(ctx, camOffset);
 
                 ctx.restore();
 
-                // Particles on top
                 ParticleSystem.draw(ctx);
-
-                // UI last
                 UI.draw(ctx);
             },
 
             drawShadows(ctx, camOffset) {
-                // Player shadow
                 const pos = Player.getWorldPos();
-                const shadowSize = CFG.CELL_SIZE * 0.85 * 1.1;
-                const shadowY = CFG.HEIGHT - (pos.y - camOffset.y) + CFG.CELL_SIZE * 0.3;
+                const shadowSize = CFG.CELL_SIZE * 0.85 * 1.2;
+                const shadowY = CFG.HEIGHT - (pos.y - camOffset.y) + CFG.CELL_SIZE * 0.35;
 
-                ctx.globalAlpha = 0.3;
+                ctx.globalAlpha = 0.4;
                 ctx.drawImage(
                     SpriteCache.playerShadow,
                     pos.x - shadowSize / 2,
@@ -1136,7 +1237,6 @@
                     shadowSize / 2
                 );
 
-                // Coin shadows
                 Entities.coins.forEach(coin => {
                     if (coin.collected) return;
                     const screenY = CFG.HEIGHT - (coin.y * CFG.CELL_SIZE - camOffset.y);
@@ -1148,7 +1248,7 @@
                     ctx.drawImage(
                         SpriteCache.coinShadow,
                         x - size / 2,
-                        screenY + CFG.CELL_SIZE * 0.15,
+                        screenY + CFG.CELL_SIZE * 0.18,
                         size,
                         size / 2
                     );
@@ -1167,7 +1267,6 @@
                     const w = wall.w * CFG.CELL_SIZE;
                     const h = wall.h * CFG.CELL_SIZE;
 
-                    // 3-color gradient for depth
                     const wallGradient = ctx.createLinearGradient(
                         x, CFG.HEIGHT - (y - camOffset.y),
                         x, CFG.HEIGHT - (y - camOffset.y) - h
@@ -1176,37 +1275,35 @@
                     wallGradient.addColorStop(0.5, CFG.COLORS.WALL[1]);
                     wallGradient.addColorStop(1, CFG.COLORS.WALL[2]);
 
-                    // Main wall
                     ctx.fillStyle = wallGradient;
-                    ctx.shadowBlur = 15;
-                    ctx.shadowColor = 'rgba(239, 68, 68, 0.4)';
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = 'rgba(255, 51, 102, 0.6)';
                     ctx.beginPath();
                     ctx.roundRect(
-                        x - w / 2 + 3,
-                        CFG.HEIGHT - (y - camOffset.y) - h + 3,
-                        w - 6,
-                        h - 6,
-                        8
+                        x - w / 2 + 5,
+                        CFG.HEIGHT - (y - camOffset.y) - h + 5,
+                        w - 10,
+                        h - 10,
+                        10
                     );
                     ctx.fill();
 
-                    // Highlight
                     const highlightGradient = ctx.createLinearGradient(
-                        x, CFG.HEIGHT - (y - camOffset.y) - h + 6,
-                        x, CFG.HEIGHT - (y - camOffset.y) - h + 6 + (h - 12) * 0.4
+                        x, CFG.HEIGHT - (y - camOffset.y) - h + 10,
+                        x, CFG.HEIGHT - (y - camOffset.y) - h + 10 + (h - 20) * 0.5
                     );
-                    highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+                    highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
                     highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
 
                     ctx.fillStyle = highlightGradient;
                     ctx.shadowBlur = 0;
                     ctx.beginPath();
                     ctx.roundRect(
-                        x - w / 2 + 8,
-                        CFG.HEIGHT - (y - camOffset.y) - h + 8,
-                        w - 16,
-                        (h - 16) * 0.4,
-                        6
+                        x - w / 2 + 12,
+                        CFG.HEIGHT - (y - camOffset.y) - h + 12,
+                        w - 24,
+                        (h - 24) * 0.5,
+                        8
                     );
                     ctx.fill();
                 });
@@ -1225,8 +1322,8 @@
                     ctx.globalAlpha = coin.alpha;
 
                     if (!coin.collected) {
-                        ctx.shadowColor = CFG.COLORS.COIN[0];
-                        ctx.shadowBlur = 20;
+                        ctx.shadowColor = '#ffd700';
+                        ctx.shadowBlur = 25;
                     }
 
                     ctx.save();
@@ -1249,11 +1346,11 @@
                 if (Player.squashTime > 0) {
                     const t = Player.squashTime / 0.15;
                     if (Player.direction.x !== 0) {
-                        scaleX = 1 - t * 0.3;
-                        scaleY = 1 + t * 0.2;
+                        scaleX = 1 - t * 0.35;
+                        scaleY = 1 + t * 0.25;
                     } else {
-                        scaleX = 1 + t * 0.2;
-                        scaleY = 1 - t * 0.3;
+                        scaleX = 1 + t * 0.25;
+                        scaleY = 1 - t * 0.35;
                     }
                 }
 
@@ -1264,8 +1361,8 @@
                 ctx.translate(drawX, drawY);
                 ctx.scale(scaleX, scaleY);
 
-                ctx.shadowColor = CFG.COLORS.PLAYER[1];
-                ctx.shadowBlur = 25;
+                ctx.shadowColor = '#00d4ff';
+                ctx.shadowBlur = 32;
 
                 ctx.drawImage(SpriteCache.player, -size / 2, -size / 2, size, size);
 
@@ -1273,18 +1370,13 @@
             }
         };
 
-        // ============================================
-        // GAME CONTROLLER
-        // ============================================
         const Game = {
             state: 'loading',
             score: 0,
-            combo: 0,
             elapsed: 0,
             lastTime: 0,
 
             async init() {
-                // Simulate loading
                 await this.loadAssets();
 
                 SpriteCache.init();
@@ -1297,11 +1389,9 @@
 
                 this.state = 'tutorial';
                 this.score = 0;
-                this.combo = 0;
                 this.elapsed = 0;
                 this.lastTime = performance.now();
 
-                // Hide loader
                 document.getElementById('loader').classList.add('hidden');
 
                 requestAnimationFrame(this.loop.bind(this));
@@ -1311,11 +1401,11 @@
                 return new Promise(resolve => {
                     let progress = 0;
                     const interval = setInterval(() => {
-                        progress += Math.random() * 0.3;
+                        progress += Math.random() * 0.2 + 0.05;
                         if (progress >= 1) {
                             progress = 1;
                             clearInterval(interval);
-                            setTimeout(resolve, 200);
+                            setTimeout(resolve, 300);
                         }
                         document.getElementById('progress').style.width = (progress * 100) + '%';
                     }, 100);
@@ -1362,9 +1452,6 @@
             }
         };
 
-        // ============================================
-        // CTA HANDLER
-        // ============================================
         window.handleCTA = function() {
             const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
             const url = isIOS ? CFG.IOS_URL : CFG.ANDROID_URL;
@@ -1376,9 +1463,6 @@
             }
         };
 
-        // ============================================
-        // START
-        // ============================================
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => Game.init());
         } else {
