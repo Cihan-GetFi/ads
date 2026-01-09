@@ -15,13 +15,14 @@
             -webkit-user-select: none;
             user-select: none;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #000;
         }
         #game {
             position: relative;
             width: 100%; height: 100%;
             max-width: 414px;
             margin: 0 auto;
-            background: #000;
+            background: linear-gradient(180deg, #0a0e27 0%, #1a1f3a 50%, #0f1729 100%);
         }
         #c {
             display: block;
@@ -38,7 +39,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 24px;
+            gap: 32px;
             z-index: 200;
             transition: opacity 0.5s ease-out;
         }
@@ -47,119 +48,138 @@
             pointer-events: none;
         }
         #loader .logo {
-            font-size: 64px;
+            font-size: 72px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 50%, #CDDC39 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 8px;
+            animation: logoGlow 2s ease-in-out infinite;
+            text-shadow: 0 0 30px rgba(76, 175, 80, 0.5);
+        }
+        @keyframes logoGlow {
+            0%, 100% { filter: drop-shadow(0 0 15px rgba(76, 175, 80, 0.6)); transform: scale(1); }
+            50% { filter: drop-shadow(0 0 30px rgba(76, 175, 80, 0.9)); transform: scale(1.05); }
+        }
+        #loader .progress-bar {
+            width: 240px;
+            height: 10px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+        }
+        #loader .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A, #CDDC39);
+            border-radius: 10px;
+            transition: width 0.3s ease-out;
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.7);
+            animation: progressShine 1.5s infinite;
+        }
+        @keyframes progressShine {
+            0% { filter: brightness(1); }
+            50% { filter: brightness(1.3); }
+            100% { filter: brightness(1); }
+        }
+        #cta {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.95) 100%);
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 28px;
+            z-index: 100;
+            animation: fadeIn 0.4s ease-out;
+            backdrop-filter: blur(10px);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        #cta .logo {
+            font-size: 56px;
             font-weight: 900;
             background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 50%, #CDDC39 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             letter-spacing: 6px;
-            animation: logoGlow 2s ease-in-out infinite;
+            filter: drop-shadow(0 4px 25px rgba(76, 175, 80, 0.5));
+            animation: ctaLogoFloat 3s ease-in-out infinite;
         }
-        @keyframes logoGlow {
-            0%, 100% { filter: drop-shadow(0 0 10px rgba(76, 175, 80, 0.5)); }
-            50% { filter: drop-shadow(0 0 20px rgba(76, 175, 80, 0.8)); }
-        }
-        #loader .progress-bar {
-            width: 200px;
-            height: 8px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        #loader .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #4CAF50, #8BC34A);
-            border-radius: 10px;
-            transition: width 0.3s ease-out;
-            box-shadow: 0 0 10px rgba(76, 175, 80, 0.6);
-        }
-        #cta {
-            display: none;
-            position: absolute;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.92);
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 24px;
-            z-index: 100;
-            animation: fadeIn 0.3s ease-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        #cta .logo {
-            font-size: 48px;
-            font-weight: 900;
-            background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 50%, #CDDC39 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: 5px;
-            filter: drop-shadow(0 4px 20px rgba(76, 175, 80, 0.4));
+        @keyframes ctaLogoFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
         }
         #cta .score-container {
             display: flex;
             align-items: center;
-            gap: 16px;
-            padding: 20px 32px;
-            background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,160,0,0.1));
-            border-radius: 20px;
-            border: 2px solid rgba(255,215,0,0.3);
+            gap: 20px;
+            padding: 24px 40px;
+            background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,160,0,0.15));
+            border-radius: 25px;
+            border: 3px solid rgba(255,215,0,0.4);
+            box-shadow: 0 8px 32px rgba(255, 215, 0, 0.3), inset 0 2px 8px rgba(255,255,255,0.1);
         }
         #cta .score {
             color: #FFD700;
-            font-size: 64px;
+            font-size: 72px;
             font-weight: 900;
-            text-shadow: 0 4px 20px rgba(255, 215, 0, 0.6), 0 0 40px rgba(255, 215, 0, 0.3);
+            text-shadow: 0 4px 25px rgba(255, 215, 0, 0.7), 0 0 50px rgba(255, 215, 0, 0.4);
             animation: scoreGlow 1.5s ease-in-out infinite;
         }
         @keyframes scoreGlow {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            0%, 100% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.08); filter: brightness(1.2); }
         }
         #cta .coin-icon {
-            width: 56px;
-            height: 56px;
+            width: 64px;
+            height: 64px;
             background: linear-gradient(135deg, #FFD700 0%, #FFA000 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 32px;
+            font-size: 36px;
             font-weight: bold;
             color: #FFA000;
-            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.5);
+            box-shadow: 0 8px 24px rgba(255, 215, 0, 0.6), inset 0 2px 8px rgba(255,255,255,0.3);
             animation: coinSpin 3s linear infinite;
         }
         @keyframes coinSpin {
-            0%, 100% { transform: rotateY(0deg); }
-            50% { transform: rotateY(180deg); }
+            0%, 100% { transform: rotateY(0deg) scale(1); }
+            25% { transform: rotateY(90deg) scale(0.9); }
+            50% { transform: rotateY(180deg) scale(1); }
+            75% { transform: rotateY(270deg) scale(0.9); }
         }
         #cta .msg {
             color: #fff;
-            font-size: 24px;
+            font-size: 26px;
             font-weight: 600;
             opacity: 0.95;
             text-align: center;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
         }
         #cta button {
             background: linear-gradient(135deg, #4CAF50 0%, #45a049 50%, #388E3C 100%);
             color: #fff;
             border: none;
-            padding: 20px 64px;
-            font-size: 24px;
+            padding: 22px 68px;
+            font-size: 26px;
             font-weight: 900;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 10px 40px rgba(76, 175, 80, 0.5);
+            box-shadow: 0 12px 48px rgba(76, 175, 80, 0.6), inset 0 2px 8px rgba(255,255,255,0.2);
             animation: ctaPulse 2s infinite ease-in-out;
             text-transform: uppercase;
             letter-spacing: 3px;
             position: relative;
             overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.2);
         }
         #cta button::before {
             content: '';
@@ -168,7 +188,7 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent);
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
             animation: buttonShine 3s infinite;
         }
         @keyframes buttonShine {
@@ -176,11 +196,11 @@
             100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
         }
         #cta button:active {
-            transform: scale(0.96);
+            transform: scale(0.97);
         }
         @keyframes ctaPulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 10px 40px rgba(76, 175, 80, 0.5); }
-            50% { transform: scale(1.08); box-shadow: 0 15px 60px rgba(76, 175, 80, 0.7); }
+            0%, 100% { transform: scale(1); box-shadow: 0 12px 48px rgba(76, 175, 80, 0.6); }
+            50% { transform: scale(1.1); box-shadow: 0 18px 72px rgba(76, 175, 80, 0.8); }
         }
         .hidden { display: none !important; }
     </style>
@@ -216,30 +236,18 @@
         // ============================================
         const Easing = {
             linear: t => t,
-            easeInQuad: t => t * t,
             easeOutQuad: t => t * (2 - t),
             easeInOutQuad: t => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t,
-            easeInCubic: t => t * t * t,
             easeOutCubic: t => (--t) * t * t + 1,
             easeInOutCubic: t => t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1,
             easeOutElastic: t => {
                 const c4 = (2 * Math.PI) / 3;
                 return t === 0 ? 0 : t === 1 ? 1 : Math.pow(2, -10 * t) * Math.sin((t * 10 - 0.75) * c4) + 1;
             },
-            easeOutBounce: t => {
-                const n1 = 7.5625;
-                const d1 = 2.75;
-                if (t < 1 / d1) return n1 * t * t;
-                else if (t < 2 / d1) return n1 * (t -= 1.5 / d1) * t + 0.75;
-                else if (t < 2.5 / d1) return n1 * (t -= 2.25 / d1) * t + 0.9375;
-                else return n1 * (t -= 2.625 / d1) * t + 0.984375;
-            },
-            easeInOutBack: t => {
+            easeOutBack: t => {
                 const c1 = 1.70158;
-                const c2 = c1 * 1.525;
-                return t < 0.5
-                    ? (Math.pow(2 * t, 2) * ((c2 + 1) * 2 * t - c2)) / 2
-                    : (Math.pow(2 * t - 2, 2) * ((c2 + 1) * (t * 2 - 2) + c2) + 2) / 2;
+                const c3 = c1 + 1;
+                return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
             }
         };
 
@@ -262,17 +270,16 @@
             GAME_DURATION: 15000,
             TUTORIAL_FADE_SPEED: 2,
 
-            // Enhanced colors
             COLORS: {
-                BG_TOP: '#1a1a2e',
-                BG_MID: '#16213e',
-                BG_BOTTOM: '#0f3460',
-                PLAYER: ['#4ade80', '#22c55e', '#16a34a'],
-                COIN: ['#fbbf24', '#f59e0b', '#d97706'],
-                WALL: ['#ef4444', '#dc2626', '#991b1b'],
+                BG_TOP: '#0a0e27',
+                BG_MID: '#1a1f3a',
+                BG_BOTTOM: '#0f1729',
+                PLAYER: ['#5efc82', '#3cd070', '#1ea952'],
+                COIN: ['#ffd93d', '#ffb627', '#ff8c00'],
+                WALL: ['#ff5e6c', '#e03e4c', '#b71c2d'],
                 TEXT: '#FFFFFF',
-                GRID: 'rgba(255,255,255,0.06)',
-                PARTICLE: ['#fbbf24', '#fb923c', '#f472b6']
+                GRID: 'rgba(255,255,255,0.04)',
+                PARTICLE: ['#ffd93d', '#ff6b9d', '#c084fc']
             },
 
             PLAYER_RADIUS: 0.4,
@@ -301,15 +308,14 @@
         };
 
         // ============================================
-        // PARTICLE SYSTEM
+        // PARTICLE SYSTEM (FIXED)
         // ============================================
         const ParticleSystem = {
             particles: [],
             pool: [],
 
             init() {
-                // Pre-create particle pool
-                for (let i = 0; i < 100; i++) {
+                for (let i = 0; i < 150; i++) {
                     this.pool.push(this.createParticle());
                 }
             },
@@ -319,7 +325,7 @@
                     x: 0, y: 0,
                     vx: 0, vy: 0,
                     life: 0, maxLife: 1,
-                    size: 4,
+                    size: 4, initialSize: 4,
                     color: '#fff',
                     alpha: 1,
                     gravity: 0,
@@ -337,6 +343,7 @@
                 p.life = 0;
                 p.maxLife = config.life || 1;
                 p.size = config.size || 4;
+                p.initialSize = p.size;
                 p.color = config.color || '#fff';
                 p.alpha = 1;
                 p.gravity = config.gravity || 0;
@@ -374,23 +381,23 @@
                     p.vy += p.gravity * dt * 60;
 
                     const progress = p.life / p.maxLife;
-                    p.alpha = 1 - Easing.easeInQuad(progress);
-                    p.size = (config.size || 4) * (1 - Easing.easeOutQuad(progress) * 0.5);
+                    p.alpha = 1 - Easing.easeOutQuad(progress);
+                    p.size = p.initialSize * (1 - Easing.easeOutCubic(progress) * 0.5);
                 }
             },
 
             draw(ctx) {
                 this.particles.forEach(p => {
+                    ctx.save();
                     ctx.globalAlpha = p.alpha;
                     ctx.fillStyle = p.color;
-                    ctx.shadowBlur = 10;
+                    ctx.shadowBlur = 15;
                     ctx.shadowColor = p.color;
                     ctx.beginPath();
                     ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
                     ctx.fill();
+                    ctx.restore();
                 });
-                ctx.globalAlpha = 1;
-                ctx.shadowBlur = 0;
             }
         };
 
@@ -399,7 +406,7 @@
         // ============================================
         const TrailSystem = {
             points: [],
-            maxPoints: 15,
+            maxPoints: 20,
 
             add(x, y) {
                 this.points.push({ x, y, life: 1 });
@@ -410,12 +417,12 @@
 
             update(dt) {
                 this.points.forEach(p => {
-                    p.life -= dt * 2.5;
+                    p.life -= dt * 2;
                 });
                 this.points = this.points.filter(p => p.life > 0);
             },
 
-            draw(ctx, camOffset) {
+            draw(ctx) {
                 if (this.points.length < 2) return;
 
                 ctx.save();
@@ -426,17 +433,17 @@
                     const p1 = this.points[i - 1];
                     const p2 = this.points[i];
 
-                    const alpha = p2.life * 0.6;
-                    const width = p2.life * 20;
+                    const alpha = p2.life * 0.7;
+                    const width = p2.life * 25;
 
                     const gradient = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
-                    gradient.addColorStop(0, `rgba(76, 222, 128, ${alpha * 0.5})`);
-                    gradient.addColorStop(1, `rgba(74, 222, 128, ${alpha})`);
+                    gradient.addColorStop(0, `rgba(94, 252, 130, ${alpha * 0.4})`);
+                    gradient.addColorStop(1, `rgba(94, 252, 130, ${alpha})`);
 
                     ctx.strokeStyle = gradient;
                     ctx.lineWidth = width;
-                    ctx.shadowBlur = 15;
-                    ctx.shadowColor = 'rgba(76, 222, 128, 0.5)';
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = 'rgba(94, 252, 130, 0.6)';
 
                     ctx.beginPath();
                     ctx.moveTo(p1.x, p1.y);
@@ -458,22 +465,22 @@
             coinShadow: null,
 
             init() {
-                this.player = this.createAdvancedBall(CFG.CELL_SIZE * 0.85, CFG.COLORS.PLAYER);
-                this.coin = this.createAdvancedCoin(CFG.CELL_SIZE * 0.55);
+                this.player = this.createPremiumBall(CFG.CELL_SIZE * 0.85, CFG.COLORS.PLAYER);
+                this.coin = this.createPremiumCoin(CFG.CELL_SIZE * 0.55);
                 this.playerShadow = this.createShadow(CFG.CELL_SIZE * 0.85);
                 this.coinShadow = this.createShadow(CFG.CELL_SIZE * 0.55);
             },
 
             createShadow(size) {
                 const canvas = document.createElement('canvas');
-                const s = size * CFG.PIXEL_RATIO * 1.2;
+                const s = size * CFG.PIXEL_RATIO * 1.3;
                 canvas.width = s;
                 canvas.height = s / 2;
                 const ctx = canvas.getContext('2d');
 
                 const gradient = ctx.createRadialGradient(s / 2, canvas.height / 2, 0, s / 2, canvas.height / 2, s / 2);
-                gradient.addColorStop(0, 'rgba(0, 0, 0, 0.4)');
-                gradient.addColorStop(0.5, 'rgba(0, 0, 0, 0.2)');
+                gradient.addColorStop(0, 'rgba(0, 0, 0, 0.5)');
+                gradient.addColorStop(0.4, 'rgba(0, 0, 0, 0.25)');
                 gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
                 ctx.fillStyle = gradient;
@@ -484,108 +491,130 @@
                 return canvas;
             },
 
-            createAdvancedBall(size, colors) {
+            createPremiumBall(size, colors) {
                 const canvas = document.createElement('canvas');
                 const s = size * CFG.PIXEL_RATIO;
                 canvas.width = s;
                 canvas.height = s;
                 const ctx = canvas.getContext('2d');
 
-                // Main gradient (3-color for depth)
+                // Main ball with 3-color gradient
                 const mainGradient = ctx.createRadialGradient(
-                    s * 0.35, s * 0.35, 0,
+                    s * 0.3, s * 0.3, 0,
                     s * 0.5, s * 0.5, s * 0.5
                 );
                 mainGradient.addColorStop(0, colors[0]);
-                mainGradient.addColorStop(0.6, colors[1]);
+                mainGradient.addColorStop(0.5, colors[1]);
                 mainGradient.addColorStop(1, colors[2]);
 
-                // Main circle
                 ctx.beginPath();
-                ctx.arc(s / 2, s / 2, s / 2 - 2, 0, Math.PI * 2);
+                ctx.arc(s / 2, s / 2, s / 2 - 3, 0, Math.PI * 2);
                 ctx.fillStyle = mainGradient;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = colors[1];
                 ctx.fill();
 
-                // Specular highlight
+                // Large specular highlight
                 const highlightGradient = ctx.createRadialGradient(
-                    s * 0.32, s * 0.28, 0,
-                    s * 0.32, s * 0.28, s * 0.25
+                    s * 0.3, s * 0.25, 0,
+                    s * 0.3, s * 0.25, s * 0.28
                 );
-                highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
-                highlightGradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.4)');
+                highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+                highlightGradient.addColorStop(0.4, 'rgba(255, 255, 255, 0.5)');
                 highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
 
+                ctx.shadowBlur = 0;
                 ctx.beginPath();
-                ctx.arc(s * 0.32, s * 0.28, s * 0.25, 0, Math.PI * 2);
+                ctx.arc(s * 0.3, s * 0.25, s * 0.28, 0, Math.PI * 2);
                 ctx.fillStyle = highlightGradient;
                 ctx.fill();
 
                 // Secondary highlight
                 ctx.beginPath();
-                ctx.ellipse(s * 0.65, s * 0.65, s * 0.12, s * 0.08, Math.PI / 4, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.ellipse(s * 0.68, s * 0.68, s * 0.15, s * 0.1, Math.PI / 4, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+                ctx.fill();
+
+                // Rim light
+                const rimGradient = ctx.createRadialGradient(
+                    s / 2, s / 2, s * 0.38,
+                    s / 2, s / 2, s * 0.48
+                );
+                rimGradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
+                rimGradient.addColorStop(0.8, 'rgba(255, 255, 255, 0.15)');
+                rimGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+                ctx.beginPath();
+                ctx.arc(s / 2, s / 2, s / 2 - 3, 0, Math.PI * 2);
+                ctx.fillStyle = rimGradient;
                 ctx.fill();
 
                 return canvas;
             },
 
-            createAdvancedCoin(size) {
+            createPremiumCoin(size) {
                 const canvas = document.createElement('canvas');
                 const s = size * CFG.PIXEL_RATIO;
                 canvas.width = s;
                 canvas.height = s;
                 const ctx = canvas.getContext('2d');
 
-                // Outer rim (3D effect)
-                const rimGradient = ctx.createRadialGradient(
-                    s / 2, s / 2, s * 0.35,
+                // Outer ring with depth
+                const outerGradient = ctx.createRadialGradient(
+                    s / 2, s / 2, s * 0.3,
                     s / 2, s / 2, s / 2
                 );
-                rimGradient.addColorStop(0, '#d97706');
-                rimGradient.addColorStop(0.5, '#f59e0b');
-                rimGradient.addColorStop(1, '#b45309');
+                outerGradient.addColorStop(0, '#b8860b');
+                outerGradient.addColorStop(0.5, '#ffd700');
+                outerGradient.addColorStop(0.8, '#daa520');
+                outerGradient.addColorStop(1, '#b8860b');
 
                 ctx.beginPath();
                 ctx.arc(s / 2, s / 2, s / 2 - 2, 0, Math.PI * 2);
-                ctx.fillStyle = rimGradient;
+                ctx.fillStyle = outerGradient;
+                ctx.shadowBlur = 6;
+                ctx.shadowColor = '#ffd700';
                 ctx.fill();
 
                 // Inner coin face
                 const faceGradient = ctx.createRadialGradient(
-                    s * 0.4, s * 0.4, 0,
-                    s / 2, s / 2, s * 0.42
+                    s * 0.35, s * 0.35, 0,
+                    s / 2, s / 2, s * 0.44
                 );
-                faceGradient.addColorStop(0, '#fef08a');
-                faceGradient.addColorStop(0.4, '#fbbf24');
-                faceGradient.addColorStop(1, '#f59e0b');
+                faceGradient.addColorStop(0, '#fff9c4');
+                faceGradient.addColorStop(0.3, '#ffd93d');
+                faceGradient.addColorStop(0.7, '#ffb627');
+                faceGradient.addColorStop(1, '#ff8c00');
 
+                ctx.shadowBlur = 0;
                 ctx.beginPath();
-                ctx.arc(s / 2, s / 2, s * 0.42, 0, Math.PI * 2);
+                ctx.arc(s / 2, s / 2, s * 0.44, 0, Math.PI * 2);
                 ctx.fillStyle = faceGradient;
                 ctx.fill();
 
-                // Highlight
+                // Strong highlight
                 const highlightGradient = ctx.createRadialGradient(
-                    s * 0.35, s * 0.32, 0,
-                    s * 0.35, s * 0.32, s * 0.2
+                    s * 0.32, s * 0.28, 0,
+                    s * 0.32, s * 0.28, s * 0.22
                 );
-                highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+                highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+                highlightGradient.addColorStop(0.6, 'rgba(255, 255, 255, 0.3)');
                 highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
 
                 ctx.beginPath();
-                ctx.arc(s * 0.35, s * 0.32, s * 0.2, 0, Math.PI * 2);
+                ctx.arc(s * 0.32, s * 0.28, s * 0.22, 0, Math.PI * 2);
                 ctx.fillStyle = highlightGradient;
                 ctx.fill();
 
-                // Dollar sign
+                // Dollar sign with stroke
                 ctx.fillStyle = '#d97706';
-                ctx.strokeStyle = '#d97706';
-                ctx.lineWidth = s * 0.03;
-                ctx.font = `bold ${s * 0.5}px Arial`;
+                ctx.strokeStyle = '#8b4513';
+                ctx.lineWidth = s * 0.02;
+                ctx.font = `900 ${s * 0.52}px Arial`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.strokeText('$', s / 2, s / 2 + s * 0.03);
-                ctx.fillText('$', s / 2, s / 2 + s * 0.03);
+                ctx.strokeText('$', s / 2, s / 2 + s * 0.04);
+                ctx.fillText('$', s / 2, s / 2 + s * 0.04);
 
                 return canvas;
             }
@@ -679,14 +708,13 @@
                     this.direction = newDir;
                     this.squashTime = 0.15;
 
-                    // Direction change particle burst
                     const pos = this.getWorldPos();
                     const camOffset = Camera.getOffset();
                     ParticleSystem.spawnBurst(
                         pos.x,
                         CFG.HEIGHT - (pos.y - camOffset.y),
-                        8,
-                        { color: CFG.COLORS.PLAYER[0], size: 3, life: 0.5, speed: 2, spread: 1 }
+                        10,
+                        { color: CFG.COLORS.PLAYER[0], size: 4, life: 0.6, speed: 2.5, spread: 1.5 }
                     );
                 }
 
@@ -708,9 +736,8 @@
                     this.squashTime = Math.max(0, this.squashTime - dt);
                 }
 
-                // Trail effect
                 this.trailTimer += dt;
-                if (this.trailTimer > 0.05) {
+                if (this.trailTimer > 0.04) {
                     const pos = this.getWorldPos();
                     const camOffset = Camera.getOffset();
                     TrailSystem.add(pos.x, CFG.HEIGHT - (pos.y - camOffset.y));
@@ -748,7 +775,7 @@
                 this.y += CFG.CAMERA_SPEED * dt;
 
                 if (this.shakeAmount > 0) {
-                    this.shakeAmount *= 0.9;
+                    this.shakeAmount *= 0.88;
                     if (this.shakeAmount < 0.5) this.shakeAmount = 0;
 
                     this.shakeX = (Math.random() - 0.5) * this.shakeAmount;
@@ -760,7 +787,7 @@
             },
 
             shake(intensity = 15) {
-                this.shakeAmount = intensity;
+                this.shakeAmount = Math.max(this.shakeAmount, intensity);
             },
 
             getOffset() {
@@ -807,12 +834,11 @@
 
                 this.coins.forEach(coin => {
                     if (coin.collected) {
-                        coin.scale += dt * 4;
-                        coin.alpha -= dt * 3;
+                        coin.scale += dt * 5;
+                        coin.alpha -= dt * 2.5;
                     } else {
-                        // Idle bob animation
-                        coin.scale = 1 + Math.sin(time * 3 + coin.bobOffset) * 0.15;
-                        coin.rotation += dt * 1.5;
+                        coin.scale = 1 + Math.sin(time * 3.5 + coin.bobOffset) * 0.18;
+                        coin.rotation += dt * 1.8;
                     }
                 });
 
@@ -858,40 +884,37 @@
             collectCoin(coin) {
                 coin.collected = true;
                 Game.score++;
-                Game.combo++;
                 UI.addCoinFX(coin.x, coin.y);
 
-                // Particle burst
                 const worldX = (coin.x - CFG.GRID_WIDTH / 2 + 0.5) * CFG.CELL_SIZE + CFG.WIDTH / 2;
                 const camOffset = Camera.getOffset();
                 const screenY = CFG.HEIGHT - (coin.y * CFG.CELL_SIZE - camOffset.y);
 
-                ParticleSystem.spawnBurst(worldX, screenY, 12, {
+                ParticleSystem.spawnBurst(worldX, screenY, 16, {
                     color: CFG.COLORS.COIN[0],
-                    size: 5,
-                    life: 0.8,
-                    speed: 4,
-                    spread: 2,
-                    gravity: 0.15
+                    size: 6,
+                    life: 1,
+                    speed: 5,
+                    spread: 2.5,
+                    gravity: 0.18
                 });
 
-                Camera.shake(5);
+                Camera.shake(6);
             },
 
             hitWall() {
                 if (Game.state !== 'playing') return;
                 Game.state = 'gameover';
-                Camera.shake(25);
-                Player.squashTime = 0.4;
+                Camera.shake(30);
+                Player.squashTime = 0.45;
 
-                // Impact particles
                 const pos = Player.getWorldPos();
                 const camOffset = Camera.getOffset();
                 ParticleSystem.spawnBurst(
                     pos.x,
                     CFG.HEIGHT - (pos.y - camOffset.y),
-                    20,
-                    { color: '#ef4444', size: 6, life: 1, speed: 5, spread: 3, gravity: 0.2 }
+                    25,
+                    { color: '#ff5e6c', size: 7, life: 1.2, speed: 6, spread: 3.5, gravity: 0.25 }
                 );
 
                 setTimeout(() => Game.showCTA(), 1200);
@@ -914,7 +937,7 @@
                     x: worldX,
                     y: screenY,
                     alpha: 1,
-                    scale: 0.5,
+                    scale: 0.4,
                     life: 0
                 });
             },
@@ -926,75 +949,68 @@
 
                 this.coinFX = this.coinFX.filter(fx => {
                     fx.life += dt;
-                    fx.y -= dt * 80;
-                    fx.alpha = 1 - Easing.easeInQuad(fx.life / 0.8);
-                    fx.scale = 0.5 + Easing.easeOutBack(Math.min(fx.life / 0.3, 1)) * 0.5;
-                    return fx.life < 0.8;
+                    fx.y -= dt * 90;
+                    fx.alpha = 1 - Easing.easeOutQuad(fx.life / 0.9);
+                    fx.scale = 0.4 + Easing.easeOutBack(Math.min(fx.life / 0.35, 1)) * 0.7;
+                    return fx.life < 0.9;
                 });
             },
 
             draw(ctx) {
-                // Score with glow
                 ctx.save();
                 ctx.fillStyle = CFG.COLORS.TEXT;
-                ctx.font = 'bold 32px Arial';
+                ctx.font = 'bold 36px Arial';
                 ctx.textAlign = 'left';
-                ctx.shadowColor = 'rgba(74, 222, 128, 0.6)';
-                ctx.shadowBlur = 10;
-                ctx.shadowOffsetY = 2;
+                ctx.shadowColor = 'rgba(94, 252, 130, 0.7)';
+                ctx.shadowBlur = 12;
 
-                const scoreX = 24;
-                const scoreY = 48;
+                const scoreX = 26;
+                const scoreY = 52;
                 ctx.fillText(Game.score.toString(), scoreX, scoreY);
 
-                // Coin icon
-                const iconSize = 32;
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = 'rgba(251, 191, 36, 0.6)';
-                ctx.drawImage(SpriteCache.coin, scoreX + 50, scoreY - 24, iconSize, iconSize);
+                const iconSize = 36;
+                ctx.shadowBlur = 18;
+                ctx.shadowColor = 'rgba(255, 217, 61, 0.7)';
+                ctx.drawImage(SpriteCache.coin, scoreX + 56, scoreY - 26, iconSize, iconSize);
                 ctx.restore();
 
-                // Enhanced timer bar
                 const progress = Math.max(0, (CFG.GAME_DURATION - Game.elapsed) / CFG.GAME_DURATION);
-                const barX = 24;
-                const barY = 68;
-                const barW = CFG.WIDTH - 48;
-                const barH = 10;
+                const barX = 26;
+                const barY = 74;
+                const barW = CFG.WIDTH - 52;
+                const barH = 11;
 
-                // Bar background
-                ctx.fillStyle = 'rgba(255,255,255,0.15)';
+                ctx.fillStyle = 'rgba(255,255,255,0.12)';
+                ctx.shadowBlur = 0;
                 ctx.beginPath();
-                ctx.roundRect(barX, barY, barW, barH, 5);
+                ctx.roundRect(barX, barY, barW, barH, 6);
                 ctx.fill();
 
-                // Bar fill with gradient
                 const gradient = ctx.createLinearGradient(barX, 0, barX + barW * progress, 0);
-                gradient.addColorStop(0, '#4ade80');
-                gradient.addColorStop(0.5, '#22c55e');
-                gradient.addColorStop(1, '#16a34a');
+                gradient.addColorStop(0, '#5efc82');
+                gradient.addColorStop(0.5, '#3cd070');
+                gradient.addColorStop(1, '#1ea952');
 
                 ctx.fillStyle = gradient;
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = 'rgba(74, 222, 128, 0.5)';
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = 'rgba(94, 252, 130, 0.6)';
                 ctx.beginPath();
-                ctx.roundRect(barX, barY, barW * progress, barH, 5);
+                ctx.roundRect(barX, barY, barW * progress, barH, 6);
                 ctx.fill();
                 ctx.shadowBlur = 0;
 
-                // Coin FX
                 this.coinFX.forEach(fx => {
                     ctx.save();
                     ctx.globalAlpha = fx.alpha;
                     ctx.fillStyle = CFG.COLORS.COIN[0];
-                    ctx.font = `bold ${24 * fx.scale}px Arial`;
+                    ctx.font = `900 ${28 * fx.scale}px Arial`;
                     ctx.textAlign = 'center';
-                    ctx.shadowBlur = 8;
+                    ctx.shadowBlur = 10;
                     ctx.shadowColor = CFG.COLORS.COIN[0];
                     ctx.fillText('+1', fx.x, fx.y);
                     ctx.restore();
                 });
 
-                // Tutorial
                 if (this.tutorialAlpha > 0 && (Game.state === 'tutorial' || Game.state === 'loading')) {
                     this.drawTutorial(ctx);
                 }
@@ -1003,43 +1019,41 @@
             drawTutorial(ctx) {
                 const alpha = this.tutorialAlpha;
 
-                ctx.fillStyle = `rgba(0,0,0,${0.5 * alpha})`;
+                ctx.fillStyle = `rgba(0,0,0,${0.55 * alpha})`;
                 ctx.fillRect(0, 0, CFG.WIDTH, CFG.HEIGHT);
 
                 ctx.globalAlpha = alpha;
 
-                // Title with gradient
-                const titleGradient = ctx.createLinearGradient(0, CFG.HEIGHT / 2 - 80, 0, CFG.HEIGHT / 2 - 40);
-                titleGradient.addColorStop(0, '#4ade80');
-                titleGradient.addColorStop(1, '#22c55e');
+                const titleGradient = ctx.createLinearGradient(0, CFG.HEIGHT / 2 - 85, 0, CFG.HEIGHT / 2 - 40);
+                titleGradient.addColorStop(0, '#5efc82');
+                titleGradient.addColorStop(1, '#3cd070');
 
                 ctx.fillStyle = titleGradient;
-                ctx.font = 'bold 36px Arial';
+                ctx.font = 'bold 40px Arial';
                 ctx.textAlign = 'center';
-                ctx.shadowColor = 'rgba(74, 222, 128, 0.8)';
-                ctx.shadowBlur = 20;
-                ctx.fillText('Swipe to Move', CFG.WIDTH / 2, CFG.HEIGHT / 2 - 60);
+                ctx.shadowColor = 'rgba(94, 252, 130, 0.9)';
+                ctx.shadowBlur = 25;
+                ctx.fillText('Swipe to Move', CFG.WIDTH / 2, CFG.HEIGHT / 2 - 65);
 
-                // Animated hand
                 const time = performance.now() / 1000;
-                const handX = CFG.WIDTH / 2 + Math.sin(time * 2.5) * 60;
-                const handY = CFG.HEIGHT / 2 + 20;
+                const handX = CFG.WIDTH / 2 + Math.sin(time * 2.5) * 65;
+                const handY = CFG.HEIGHT / 2 + 25;
 
-                ctx.strokeStyle = `rgba(255,255,255,${0.6 * alpha})`;
-                ctx.lineWidth = 4;
+                ctx.strokeStyle = `rgba(255,255,255,${0.65 * alpha})`;
+                ctx.lineWidth = 5;
                 ctx.lineCap = 'round';
-                ctx.setLineDash([12, 8]);
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = 'rgba(255,255,255,0.5)';
+                ctx.setLineDash([14, 10]);
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = 'rgba(255,255,255,0.6)';
                 ctx.beginPath();
-                ctx.moveTo(CFG.WIDTH / 2 - 70, handY);
-                ctx.lineTo(CFG.WIDTH / 2 + 70, handY);
+                ctx.moveTo(CFG.WIDTH / 2 - 75, handY);
+                ctx.lineTo(CFG.WIDTH / 2 + 75, handY);
                 ctx.stroke();
                 ctx.setLineDash([]);
 
-                ctx.font = '60px Arial';
-                ctx.shadowBlur = 15;
-                ctx.fillText('☝️', handX, handY + 10);
+                ctx.font = '68px Arial';
+                ctx.shadowBlur = 18;
+                ctx.fillText('☝️', handX, handY + 12);
 
                 ctx.shadowBlur = 0;
                 ctx.globalAlpha = 1;
@@ -1060,15 +1074,16 @@
                 this.canvas.style.width = '100%';
                 this.canvas.style.height = '100%';
 
-                this.ctx = this.canvas.getContext('2d', { alpha: false });
+                this.ctx = this.canvas.getContext('2d', { alpha: false, desynchronized: true });
                 this.ctx.scale(CFG.PIXEL_RATIO, CFG.PIXEL_RATIO);
+                this.ctx.imageSmoothingEnabled = true;
+                this.ctx.imageSmoothingQuality = 'high';
             },
 
             draw() {
                 const ctx = this.ctx;
                 const camOffset = Camera.getOffset();
 
-                // Enhanced background with 3 colors
                 const bgGradient = ctx.createLinearGradient(0, 0, 0, CFG.HEIGHT);
                 bgGradient.addColorStop(0, CFG.COLORS.BG_TOP);
                 bgGradient.addColorStop(0.5, CFG.COLORS.BG_MID);
@@ -1076,7 +1091,6 @@
                 ctx.fillStyle = bgGradient;
                 ctx.fillRect(0, 0, CFG.WIDTH, CFG.HEIGHT);
 
-                // Subtle grid
                 ctx.strokeStyle = CFG.COLORS.GRID;
                 ctx.lineWidth = 1;
 
@@ -1100,34 +1114,24 @@
                 ctx.save();
                 ctx.translate(camOffset.x, 0);
 
-                // Draw shadows first
                 this.drawShadows(ctx, camOffset);
-
-                // Draw entities
                 this.drawWalls(ctx, camOffset);
                 this.drawCoins(ctx, camOffset);
-
-                // Trail behind player
-                TrailSystem.draw(ctx, camOffset);
-
+                TrailSystem.draw(ctx);
                 this.drawPlayer(ctx, camOffset);
 
                 ctx.restore();
 
-                // Particles on top
                 ParticleSystem.draw(ctx);
-
-                // UI last
                 UI.draw(ctx);
             },
 
             drawShadows(ctx, camOffset) {
-                // Player shadow
                 const pos = Player.getWorldPos();
-                const shadowSize = CFG.CELL_SIZE * 0.85 * 1.1;
-                const shadowY = CFG.HEIGHT - (pos.y - camOffset.y) + CFG.CELL_SIZE * 0.3;
+                const shadowSize = CFG.CELL_SIZE * 0.85 * 1.15;
+                const shadowY = CFG.HEIGHT - (pos.y - camOffset.y) + CFG.CELL_SIZE * 0.32;
 
-                ctx.globalAlpha = 0.3;
+                ctx.globalAlpha = 0.35;
                 ctx.drawImage(
                     SpriteCache.playerShadow,
                     pos.x - shadowSize / 2,
@@ -1136,7 +1140,6 @@
                     shadowSize / 2
                 );
 
-                // Coin shadows
                 Entities.coins.forEach(coin => {
                     if (coin.collected) return;
                     const screenY = CFG.HEIGHT - (coin.y * CFG.CELL_SIZE - camOffset.y);
@@ -1148,7 +1151,7 @@
                     ctx.drawImage(
                         SpriteCache.coinShadow,
                         x - size / 2,
-                        screenY + CFG.CELL_SIZE * 0.15,
+                        screenY + CFG.CELL_SIZE * 0.16,
                         size,
                         size / 2
                     );
@@ -1167,7 +1170,6 @@
                     const w = wall.w * CFG.CELL_SIZE;
                     const h = wall.h * CFG.CELL_SIZE;
 
-                    // 3-color gradient for depth
                     const wallGradient = ctx.createLinearGradient(
                         x, CFG.HEIGHT - (y - camOffset.y),
                         x, CFG.HEIGHT - (y - camOffset.y) - h
@@ -1176,37 +1178,35 @@
                     wallGradient.addColorStop(0.5, CFG.COLORS.WALL[1]);
                     wallGradient.addColorStop(1, CFG.COLORS.WALL[2]);
 
-                    // Main wall
                     ctx.fillStyle = wallGradient;
-                    ctx.shadowBlur = 15;
-                    ctx.shadowColor = 'rgba(239, 68, 68, 0.4)';
+                    ctx.shadowBlur = 18;
+                    ctx.shadowColor = 'rgba(255, 94, 108, 0.5)';
                     ctx.beginPath();
                     ctx.roundRect(
-                        x - w / 2 + 3,
-                        CFG.HEIGHT - (y - camOffset.y) - h + 3,
-                        w - 6,
-                        h - 6,
-                        8
+                        x - w / 2 + 4,
+                        CFG.HEIGHT - (y - camOffset.y) - h + 4,
+                        w - 8,
+                        h - 8,
+                        9
                     );
                     ctx.fill();
 
-                    // Highlight
                     const highlightGradient = ctx.createLinearGradient(
-                        x, CFG.HEIGHT - (y - camOffset.y) - h + 6,
-                        x, CFG.HEIGHT - (y - camOffset.y) - h + 6 + (h - 12) * 0.4
+                        x, CFG.HEIGHT - (y - camOffset.y) - h + 8,
+                        x, CFG.HEIGHT - (y - camOffset.y) - h + 8 + (h - 16) * 0.45
                     );
-                    highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+                    highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.35)');
                     highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
 
                     ctx.fillStyle = highlightGradient;
                     ctx.shadowBlur = 0;
                     ctx.beginPath();
                     ctx.roundRect(
-                        x - w / 2 + 8,
-                        CFG.HEIGHT - (y - camOffset.y) - h + 8,
-                        w - 16,
-                        (h - 16) * 0.4,
-                        6
+                        x - w / 2 + 10,
+                        CFG.HEIGHT - (y - camOffset.y) - h + 10,
+                        w - 20,
+                        (h - 20) * 0.45,
+                        7
                     );
                     ctx.fill();
                 });
@@ -1226,7 +1226,7 @@
 
                     if (!coin.collected) {
                         ctx.shadowColor = CFG.COLORS.COIN[0];
-                        ctx.shadowBlur = 20;
+                        ctx.shadowBlur = 22;
                     }
 
                     ctx.save();
@@ -1249,11 +1249,11 @@
                 if (Player.squashTime > 0) {
                     const t = Player.squashTime / 0.15;
                     if (Player.direction.x !== 0) {
-                        scaleX = 1 - t * 0.3;
-                        scaleY = 1 + t * 0.2;
+                        scaleX = 1 - t * 0.32;
+                        scaleY = 1 + t * 0.22;
                     } else {
-                        scaleX = 1 + t * 0.2;
-                        scaleY = 1 - t * 0.3;
+                        scaleX = 1 + t * 0.22;
+                        scaleY = 1 - t * 0.32;
                     }
                 }
 
@@ -1265,7 +1265,7 @@
                 ctx.scale(scaleX, scaleY);
 
                 ctx.shadowColor = CFG.COLORS.PLAYER[1];
-                ctx.shadowBlur = 25;
+                ctx.shadowBlur = 28;
 
                 ctx.drawImage(SpriteCache.player, -size / 2, -size / 2, size, size);
 
@@ -1279,12 +1279,10 @@
         const Game = {
             state: 'loading',
             score: 0,
-            combo: 0,
             elapsed: 0,
             lastTime: 0,
 
             async init() {
-                // Simulate loading
                 await this.loadAssets();
 
                 SpriteCache.init();
@@ -1297,11 +1295,9 @@
 
                 this.state = 'tutorial';
                 this.score = 0;
-                this.combo = 0;
                 this.elapsed = 0;
                 this.lastTime = performance.now();
 
-                // Hide loader
                 document.getElementById('loader').classList.add('hidden');
 
                 requestAnimationFrame(this.loop.bind(this));
@@ -1311,14 +1307,14 @@
                 return new Promise(resolve => {
                     let progress = 0;
                     const interval = setInterval(() => {
-                        progress += Math.random() * 0.3;
+                        progress += Math.random() * 0.25 + 0.05;
                         if (progress >= 1) {
                             progress = 1;
                             clearInterval(interval);
-                            setTimeout(resolve, 200);
+                            setTimeout(resolve, 250);
                         }
                         document.getElementById('progress').style.width = (progress * 100) + '%';
-                    }, 100);
+                    }, 120);
                 });
             },
 
