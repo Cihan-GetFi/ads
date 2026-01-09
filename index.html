@@ -412,7 +412,7 @@
             CELL_SIZE: 80,
             GRID_WIDTH: 9,
             PLAYER_START: { x: 4, y: 3 },
-            PLAYER_SPEED: 6,
+            PLAYER_SPEED: 3.5, // BALANCED: Reduced from 6 for better control
             CAMERA_SPEED: 3.5,
             SWIPE_THRESHOLD: 25,
             GAME_DURATION: 15000,
@@ -441,29 +441,21 @@
                 { x: 3, y: 34 }, { x: 4, y: 34 }, { x: 5, y: 34 }, { x: 2, y: 38 }, { x: 6, y: 38 }, { x: 4, y: 42 },
                 { x: 3, y: 46 }, { x: 5, y: 46 }, { x: 4, y: 50 }, { x: 4, y: 54 }, { x: 3, y: 58 }, { x: 5, y: 58 }
             ],
+            // 🧱 STATIC WALLS - Reduced count and smaller size for balance
             walls: [
-                { x: 1, y: 10, w: 2, h: 1 }, { x: 6, y: 10, w: 2, h: 1 },
-                { x: 0, y: 17, w: 3, h: 1 }, { x: 6, y: 17, w: 3, h: 1 },
-                { x: 2, y: 30, w: 2, h: 1 }, { x: 5, y: 32, w: 2, h: 1 },
-                { x: 0, y: 40, w: 2, h: 1 }, { x: 7, y: 40, w: 2, h: 1 }
+                { x: 1.5, y: 10, w: 1.5, h: 1 }, { x: 6.5, y: 10, w: 1.5, h: 1 },
+                { x: 1, y: 30, w: 1.5, h: 1 }, { x: 6.5, y: 32, w: 1.5, h: 1 }
             ],
-            // 🔥 MOVING WALLS - Horizontal sliding obstacles
+            // 🔥 MOVING WALLS - Single moving obstacle, smaller and slower
             movingWalls: [
-                { x: 2, y: 14, w: 2, h: 1, minX: 1, maxX: 6, speed: 1.5, dir: 1 },
-                { x: 5, y: 26, w: 2, h: 1, minX: 1, maxX: 6, speed: 2, dir: -1 },
-                { x: 3, y: 44, w: 2, h: 1, minX: 0, maxX: 7, speed: 1.8, dir: 1 }
+                { x: 3, y: 20, w: 1.5, h: 1, minX: 1.5, maxX: 6, speed: 1.2, dir: 1 }
             ],
-            // 🎯 TURRETS - Stationary enemies that shoot
+            // 🎯 TURRETS - Single turret with slower fire rate
             turrets: [
-                { x: 0.5, y: 20, shootDelay: 2.5, lastShot: 0 },
-                { x: 8.5, y: 35, shootDelay: 2.0, lastShot: 0 },
-                { x: 0.5, y: 48, shootDelay: 3.0, lastShot: 0 }
+                { x: 0.5, y: 40, shootDelay: 4.5, lastShot: 0 }
             ],
-            // ⚡ LASERS - Blinking deadly beams
-            lasers: [
-                { x: 2, y: 24, w: 5, h: 0.2, onTime: 1.5, offTime: 1.5, timer: 0, active: true },
-                { x: 1, y: 52, w: 7, h: 0.2, onTime: 1.0, offTime: 2.0, timer: 0, active: false }
-            ]
+            // ⚡ LASERS - Removed for better balance
+            lasers: []
         };
 
         const ParticleSystem = {
@@ -859,6 +851,47 @@
 
                 ctx.globalCompositeOperation = 'source-over';
                 ctx.globalAlpha = 1;
+                ctx.restore();
+
+                // 🏀 3D ROLLING SEGMENTS - Latitude/longitude lines for visible rotation
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                ctx.clip();
+
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+                ctx.lineWidth = 2;
+
+                // Vertical longitude lines (4 segments)
+                for (let i = 0; i < 4; i++) {
+                    const angle = (i / 4) * Math.PI * 2;
+                    const x1 = centerX + Math.cos(angle) * radius * 0.3;
+                    const x2 = centerX + Math.cos(angle + Math.PI) * radius * 0.3;
+
+                    ctx.beginPath();
+                    ctx.ellipse(centerX, centerY, Math.abs(x1 - centerX), radius * 0.95, angle, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+
+                // Horizontal latitude lines (2 lines)
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+                ctx.lineWidth = 1.5;
+
+                // Equator line
+                ctx.beginPath();
+                ctx.ellipse(centerX, centerY, radius * 0.9, radius * 0.15, 0, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // Upper latitude
+                ctx.beginPath();
+                ctx.ellipse(centerX, centerY - radius * 0.4, radius * 0.7, radius * 0.12, 0, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // Lower latitude
+                ctx.beginPath();
+                ctx.ellipse(centerX, centerY + radius * 0.4, radius * 0.7, radius * 0.12, 0, 0, Math.PI * 2);
+                ctx.stroke();
+
                 ctx.restore();
 
                 // Final edge definition
