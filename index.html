@@ -412,8 +412,8 @@
             CELL_SIZE: 80,
             GRID_WIDTH: 9,
             PLAYER_START: { x: 4, y: 3 },
-            PLAYER_SPEED: 0.5, // BALANCED: Player moves faster than camera
-            CAMERA_SPEED: 0.3, // VERY SLOW SCROLL: Player can move upward against scroll
+            PLAYER_SPEED: 0.3, // VERY SLOW: Ultra precise control
+            CAMERA_SPEED: 0.4, // SLOW SCROLL: Balanced with player speed
             SWIPE_THRESHOLD: 25,
             GAME_DURATION: 15000,
             TUTORIAL_FADE_SPEED: 2,
@@ -1215,19 +1215,19 @@
                 const maxY = centerY + 2;      // Can move down (draws higher on screen)
                 this.gridY = Math.max(minY, Math.min(maxY, this.gridY));
 
-                // 🎾 ROLLING ANIMATION - Ball rotates as it moves
+                // 🎾 ROLLING ANIMATION - Ball rotates as it moves (VERY SLOW)
                 const moveSpeed = Math.sqrt(
                     this.direction.x * this.direction.x +
                     this.direction.y * this.direction.y
                 ) * speed;
-                this.rotation += moveSpeed * 4; // Slower rotation to match slower movement
+                this.rotation += moveSpeed * 1; // Minimal rotation for slow visual perception
 
                 if (this.squashTime > 0) {
                     this.squashTime = Math.max(0, this.squashTime - dt);
                 }
 
                 this.trailTimer += dt;
-                if (this.trailTimer > 0.035) {
+                if (this.trailTimer > 0.1) { // SLOWER TRAIL: Less visual "speed lines"
                     const pos = this.getWorldPos();
                     const camOffset = Camera.getOffset();
                     TrailSystem.add(pos.x, CFG.HEIGHT - (pos.y - camOffset.y));
