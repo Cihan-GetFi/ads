@@ -388,7 +388,7 @@
             pool: [],
 
             init() {
-                for (let i = 0; i < 200; i++) {
+                for (let i = 0; i < 80; i++) {
                     this.pool.push(this.createParticle());
                 }
             },
@@ -472,8 +472,6 @@
                     gradient.addColorStop(1, p.color + '00');
 
                     ctx.fillStyle = gradient;
-                    ctx.shadowBlur = p.size * 2;
-                    ctx.shadowColor = p.color;
                     ctx.beginPath();
                     ctx.arc(0, 0, p.size, 0, Math.PI * 2);
                     ctx.fill();
@@ -485,7 +483,7 @@
 
         const TrailSystem = {
             points: [],
-            maxPoints: 25,
+            maxPoints: 12,
 
             add(x, y) {
                 this.points.push({ x, y, life: 1 });
@@ -518,8 +516,6 @@
 
                     ctx.strokeStyle = gradient;
                     ctx.lineWidth = width;
-                    ctx.shadowBlur = 25;
-                    ctx.shadowColor = 'rgba(0, 212, 255, 0.7)';
                     ctx.beginPath();
                     ctx.moveTo(p1.x, p1.y);
                     ctx.lineTo(p2.x, p2.y);
@@ -689,6 +685,7 @@
         const Input = {
             startPos: null,
             pendingDir: null,
+            keysPressed: {},
 
             init() {
                 const c = document.getElementById('c');
@@ -698,6 +695,35 @@
                 c.addEventListener('mousedown', this.onStart.bind(this));
                 c.addEventListener('mousemove', this.onMove.bind(this));
                 c.addEventListener('mouseup', this.onEnd.bind(this));
+
+                // Keyboard support
+                document.addEventListener('keydown', this.onKeyDown.bind(this));
+                document.addEventListener('keyup', this.onKeyUp.bind(this));
+            },
+
+            onKeyDown(e) {
+                if (this.keysPressed[e.key]) return; // Prevent repeat
+                this.keysPressed[e.key] = true;
+
+                let dir = null;
+                if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+                    dir = 'UP';
+                } else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+                    dir = 'DOWN';
+                } else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+                    dir = 'LEFT';
+                } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+                    dir = 'RIGHT';
+                }
+
+                if (dir) {
+                    e.preventDefault();
+                    Player.setDirection(dir);
+                }
+            },
+
+            onKeyUp(e) {
+                this.keysPressed[e.key] = false;
             },
 
             getPos(e) {
@@ -1014,14 +1040,14 @@
                 panelGradient.addColorStop(1, 'rgba(0, 0, 0, 0.3)');
 
                 ctx.fillStyle = panelGradient;
-                ctx.shadowBlur = 15;
+                ctx.shadowBlur = 8;
                 ctx.shadowColor = 'rgba(0, 255, 136, 0.3)';
                 ctx.beginPath();
                 ctx.roundRect(20, 20, 140, 70, 15);
                 ctx.fill();
 
                 // Score
-                ctx.shadowBlur = 15;
+                ctx.shadowBlur = 8;
                 ctx.shadowColor = 'rgba(0, 255, 136, 0.8)';
                 ctx.fillStyle = '#00ff88';
                 ctx.font = 'bold 42px Arial';
@@ -1030,8 +1056,7 @@
 
                 // Coin icon
                 const iconSize = 38;
-                ctx.shadowBlur = 20;
-                ctx.shadowColor = 'rgba(255, 215, 0, 0.8)';
+                ctx.shadowBlur = 0;
                 ctx.drawImage(SpriteCache.coin, 95, 40, iconSize, iconSize);
                 ctx.restore();
 
@@ -1056,7 +1081,7 @@
                 barGradient.addColorStop(1, '#a855f7');
 
                 ctx.fillStyle = barGradient;
-                ctx.shadowBlur = 15;
+                ctx.shadowBlur = 8;
                 ctx.shadowColor = 'rgba(0, 255, 136, 0.7)';
                 ctx.beginPath();
                 ctx.roundRect(barX, barY, barW * progress, barH, 6);
@@ -1076,7 +1101,7 @@
                     ctx.fillStyle = textGradient;
                     ctx.font = `900 ${32 * fx.scale}px Arial`;
                     ctx.textAlign = 'center';
-                    ctx.shadowBlur = 12;
+                    ctx.shadowBlur = 6;
                     ctx.shadowColor = '#ffd700';
                     ctx.strokeStyle = 'rgba(139, 105, 20, 0.5)';
                     ctx.lineWidth = 2;
@@ -1109,8 +1134,8 @@
                 ctx.font = 'bold 44px Arial';
                 ctx.textAlign = 'center';
                 ctx.shadowColor = 'rgba(0, 212, 255, 0.9)';
-                ctx.shadowBlur = 30;
-                ctx.fillText('Swipe to Move', CFG.WIDTH / 2, CFG.HEIGHT / 2 - 70);
+                ctx.shadowBlur = 12;
+                ctx.fillText('Swipe or Arrow Keys', CFG.WIDTH / 2, CFG.HEIGHT / 2 - 70);
 
                 // Animated hand with glow
                 const time = performance.now() / 1000;
@@ -1121,7 +1146,7 @@
                 ctx.lineWidth = 6;
                 ctx.lineCap = 'round';
                 ctx.setLineDash([16, 12]);
-                ctx.shadowBlur = 15;
+                ctx.shadowBlur = 8;
                 ctx.shadowColor = 'rgba(0, 212, 255, 0.8)';
                 ctx.beginPath();
                 ctx.moveTo(CFG.WIDTH / 2 - 80, handY);
@@ -1130,7 +1155,7 @@
                 ctx.setLineDash([]);
 
                 ctx.font = '72px Arial';
-                ctx.shadowBlur = 20;
+                ctx.shadowBlur = 10;
                 ctx.shadowColor = 'rgba(255, 215, 0, 0.8)';
                 ctx.fillText('☝️', handX, handY + 15);
 
@@ -1170,7 +1195,7 @@
 
                 // Animated stars
                 const time = performance.now() / 1000;
-                for (let i = 0; i < 30; i++) {
+                for (let i = 0; i < 15; i++) {
                     const x = (i * 73) % CFG.WIDTH;
                     const y = (i * 97 + camOffset.y * 0.3) % CFG.HEIGHT;
                     const size = 1 + (i % 3);
@@ -1178,14 +1203,11 @@
 
                     ctx.globalAlpha = twinkle * 0.6;
                     ctx.fillStyle = i % 3 === 0 ? '#00d4ff' : '#fff';
-                    ctx.shadowBlur = size * 3;
-                    ctx.shadowColor = ctx.fillStyle;
                     ctx.beginPath();
                     ctx.arc(x, y, size, 0, Math.PI * 2);
                     ctx.fill();
                 }
                 ctx.globalAlpha = 1;
-                ctx.shadowBlur = 0;
 
                 // Modern grid
                 ctx.strokeStyle = CFG.COLORS.GRID;
@@ -1276,7 +1298,7 @@
                     wallGradient.addColorStop(1, CFG.COLORS.WALL[2]);
 
                     ctx.fillStyle = wallGradient;
-                    ctx.shadowBlur = 20;
+                    ctx.shadowBlur = 10;
                     ctx.shadowColor = 'rgba(255, 51, 102, 0.6)';
                     ctx.beginPath();
                     ctx.roundRect(
@@ -1323,7 +1345,7 @@
 
                     if (!coin.collected) {
                         ctx.shadowColor = '#ffd700';
-                        ctx.shadowBlur = 25;
+                        ctx.shadowBlur = 12;
                     }
 
                     ctx.save();
@@ -1362,7 +1384,7 @@
                 ctx.scale(scaleX, scaleY);
 
                 ctx.shadowColor = '#00d4ff';
-                ctx.shadowBlur = 32;
+                ctx.shadowBlur = 16;
 
                 ctx.drawImage(SpriteCache.player, -size / 2, -size / 2, size, size);
 
