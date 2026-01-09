@@ -341,10 +341,74 @@
             }
         };
 
+        // ULTRA PREMIUM: Texture Generation Helpers
+        const TextureGen = {
+            // Simple noise function for texture generation
+            noise2D(x, y, seed = 0) {
+                const n = Math.sin(x * 12.9898 + y * 78.233 + seed) * 43758.5453;
+                return n - Math.floor(n);
+            },
+
+            // Perlin-like noise for organic textures
+            smoothNoise(x, y, scale = 1, seed = 0) {
+                x *= scale;
+                y *= scale;
+                const x0 = Math.floor(x);
+                const x1 = x0 + 1;
+                const y0 = Math.floor(y);
+                const y1 = y0 + 1;
+
+                const sx = x - x0;
+                const sy = y - y0;
+
+                const n00 = this.noise2D(x0, y0, seed);
+                const n10 = this.noise2D(x1, y0, seed);
+                const n01 = this.noise2D(x0, y1, seed);
+                const n11 = this.noise2D(x1, y1, seed);
+
+                const nx0 = n00 * (1 - sx) + n10 * sx;
+                const nx1 = n01 * (1 - sx) + n11 * sx;
+
+                return nx0 * (1 - sy) + nx1 * sy;
+            },
+
+            // Multi-octave noise for detailed textures
+            fractalNoise(x, y, octaves = 4, persistence = 0.5, scale = 1, seed = 0) {
+                let total = 0;
+                let frequency = scale;
+                let amplitude = 1;
+                let maxValue = 0;
+
+                for (let i = 0; i < octaves; i++) {
+                    total += this.smoothNoise(x, y, frequency, seed + i) * amplitude;
+                    maxValue += amplitude;
+                    amplitude *= persistence;
+                    frequency *= 2;
+                }
+
+                return total / maxValue;
+            },
+
+            // Generate normal map from height map
+            getNormal(x, y, size, getHeight) {
+                const eps = 0.5;
+                const hL = getHeight(x - eps, y);
+                const hR = getHeight(x + eps, y);
+                const hD = getHeight(x, y - eps);
+                const hU = getHeight(x, y + eps);
+
+                const dx = (hR - hL) / (2 * eps);
+                const dy = (hU - hD) / (2 * eps);
+
+                const len = Math.sqrt(dx * dx + dy * dy + 1);
+                return { x: -dx / len, y: -dy / len, z: 1 / len };
+            }
+        };
+
         const CFG = {
             WIDTH: 720,
             HEIGHT: 1280,
-            PIXEL_RATIO: Math.min(window.devicePixelRatio || 1, 3),
+            PIXEL_RATIO: Math.min(window.devicePixelRatio || 1, 8), // ULTRA HIGH RESOLUTION
             CELL_SIZE: 80,
             GRID_WIDTH: 9,
             PLAYER_START: { x: 4, y: 3 },
@@ -576,110 +640,215 @@
 
             createUltraBall(size, colors) {
                 const canvas = document.createElement('canvas');
-                const s = size * CFG.PIXEL_RATIO * 1.5; // Higher resolution
+                const s = size * CFG.PIXEL_RATIO * 2.5; // ULTRA HIGH RESOLUTION
                 canvas.width = s;
                 canvas.height = s;
                 const ctx = canvas.getContext('2d');
                 ctx.imageSmoothingEnabled = true;
                 ctx.imageSmoothingQuality = 'high';
 
-                // 3D DEPTH: Bottom contact shadow (sphere on surface)
-                const contactShadow = ctx.createRadialGradient(s * 0.5, s * 0.75, 0, s * 0.5, s * 0.75, s * 0.35);
-                contactShadow.addColorStop(0, 'rgba(0, 0, 0, 0.5)');
-                contactShadow.addColorStop(0.6, 'rgba(0, 0, 0, 0.2)');
+                const centerX = s / 2;
+                const centerY = s / 2;
+                const radius = s / 2 - 4;
+
+                // 🌑 PHOTOREALISTIC SHADOW SYSTEM
+                // Contact shadow (sphere on surface)
+                const contactShadow = ctx.createRadialGradient(centerX, s * 0.78, 0, centerX, s * 0.78, radius * 0.7);
+                contactShadow.addColorStop(0, 'rgba(0, 0, 0, 0.7)');
+                contactShadow.addColorStop(0.4, 'rgba(0, 0, 0, 0.4)');
+                contactShadow.addColorStop(0.7, 'rgba(0, 0, 0, 0.15)');
                 contactShadow.addColorStop(1, 'rgba(0, 0, 0, 0)');
                 ctx.fillStyle = contactShadow;
                 ctx.beginPath();
-                ctx.ellipse(s * 0.5, s * 0.75, s * 0.35, s * 0.15, 0, 0, Math.PI * 2);
+                ctx.ellipse(centerX, s * 0.78, radius * 0.7, radius * 0.25, 0, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Shadow base (depth simulation - darker on bottom)
-                const shadowGrad = ctx.createRadialGradient(s * 0.55, s * 0.65, 0, s * 0.5, s * 0.5, s * 0.5);
-                shadowGrad.addColorStop(0, 'rgba(0, 0, 0, 0)');
-                shadowGrad.addColorStop(0.65, 'rgba(0, 0, 0, 0.2)');
-                shadowGrad.addColorStop(0.85, 'rgba(0, 0, 0, 0.4)');
-                shadowGrad.addColorStop(1, 'rgba(0, 0, 0, 0.6)');
-                ctx.fillStyle = shadowGrad;
+                // Ambient occlusion shadow
+                const aoShadow = ctx.createRadialGradient(centerX + radius * 0.1, centerY + radius * 0.15, 0, centerX, centerY, radius);
+                aoShadow.addColorStop(0, 'rgba(0, 0, 0, 0)');
+                aoShadow.addColorStop(0.6, 'rgba(0, 0, 0, 0.15)');
+                aoShadow.addColorStop(0.8, 'rgba(0, 0, 0, 0.35)');
+                aoShadow.addColorStop(0.95, 'rgba(0, 0, 0, 0.6)');
+                aoShadow.addColorStop(1, 'rgba(0, 0, 0, 0.8)');
+                ctx.fillStyle = aoShadow;
                 ctx.beginPath();
-                ctx.arc(s / 2, s / 2, s / 2 - 3, 0, Math.PI * 2);
+                ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Base sphere with 5-layer gradient
-                const mainGradient = ctx.createRadialGradient(s * 0.28, s * 0.22, 0, s * 0.5, s * 0.5, s * 0.52);
-                mainGradient.addColorStop(0, colors[0]);
-                mainGradient.addColorStop(0.2, colors[0]);
+                // 🎨 PHOTOREALISTIC BASE - 8-layer gradient with natural color transition
+                const mainGradient = ctx.createRadialGradient(centerX * 0.7, centerY * 0.6, 0, centerX, centerY, radius * 1.05);
+                mainGradient.addColorStop(0, colors[0]); // Bright core
+                mainGradient.addColorStop(0.15, colors[0]);
+                mainGradient.addColorStop(0.3, colors[0] + 'f0');
                 mainGradient.addColorStop(0.45, colors[1]);
+                mainGradient.addColorStop(0.6, colors[1] + 'dd');
                 mainGradient.addColorStop(0.75, colors[2]);
-                mainGradient.addColorStop(1, '#000033');
+                mainGradient.addColorStop(0.88, colors[2] + 'cc');
+                mainGradient.addColorStop(0.96, '#001a33');
+                mainGradient.addColorStop(1, '#000018');
 
                 ctx.beginPath();
-                ctx.arc(s / 2, s / 2, s / 2 - 3, 0, Math.PI * 2);
+                ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
                 ctx.fillStyle = mainGradient;
-                ctx.shadowBlur = 20;
-                ctx.shadowColor = colors[1];
+                ctx.shadowBlur = 30;
+                ctx.shadowColor = colors[1] + '99';
                 ctx.fill();
                 ctx.shadowBlur = 0;
 
-                // Subsurface scattering simulation
-                const sssGrad = ctx.createRadialGradient(s * 0.25, s * 0.2, 0, s * 0.5, s * 0.5, s * 0.42);
-                sssGrad.addColorStop(0, `${colors[0]}dd`);
-                sssGrad.addColorStop(0.5, `${colors[1]}66`);
-                sssGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                // 🌟 SUBSURFACE SCATTERING - Multi-layer for realism
+                const sssGrad1 = ctx.createRadialGradient(centerX * 0.75, centerY * 0.7, 0, centerX, centerY, radius * 0.65);
+                sssGrad1.addColorStop(0, colors[0] + 'ff');
+                sssGrad1.addColorStop(0.3, colors[0] + 'aa');
+                sssGrad1.addColorStop(0.6, colors[1] + '55');
+                sssGrad1.addColorStop(1, 'rgba(255, 255, 255, 0)');
                 ctx.globalCompositeOperation = 'screen';
-                ctx.fillStyle = sssGrad;
+                ctx.fillStyle = sssGrad1;
                 ctx.beginPath();
-                ctx.arc(s / 2, s / 2, s / 2 - 3, 0, Math.PI * 2);
+                ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Secondary SSS layer
+                const sssGrad2 = ctx.createRadialGradient(centerX * 0.65, centerY * 0.55, 0, centerX, centerY, radius * 0.5);
+                sssGrad2.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+                sssGrad2.addColorStop(0.5, colors[0] + '44');
+                sssGrad2.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                ctx.fillStyle = sssGrad2;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.globalCompositeOperation = 'source-over';
 
-                // Large specular highlight (ultra bright)
-                const highlight1 = ctx.createRadialGradient(s * 0.27, s * 0.2, 0, s * 0.27, s * 0.2, s * 0.35);
-                highlight1.addColorStop(0, 'rgba(255, 255, 255, 1)');
-                highlight1.addColorStop(0.2, 'rgba(255, 255, 255, 0.9)');
-                highlight1.addColorStop(0.5, 'rgba(255, 255, 255, 0.4)');
-                highlight1.addColorStop(1, 'rgba(255, 255, 255, 0)');
-                ctx.fillStyle = highlight1;
+                // 🔍 MICRO-TEXTURE OVERLAY using fractal noise
+                const imageData = ctx.getImageData(0, 0, s, s);
+                const pixels = imageData.data;
+                for (let y = 0; y < s; y++) {
+                    for (let x = 0; x < s; x++) {
+                        const dx = x - centerX;
+                        const dy = y - centerY;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+
+                        if (dist <= radius) {
+                            const idx = (y * s + x) * 4;
+
+                            // Fractal noise for surface texture
+                            const noise = TextureGen.fractalNoise(x / s, y / s, 6, 0.6, 8, 42);
+                            const textureInfluence = 0.08; // Subtle texture
+
+                            // Apply texture to RGB channels
+                            pixels[idx] += (noise - 0.5) * 255 * textureInfluence;
+                            pixels[idx + 1] += (noise - 0.5) * 255 * textureInfluence;
+                            pixels[idx + 2] += (noise - 0.5) * 255 * textureInfluence;
+                        }
+                    }
+                }
+                ctx.putImageData(imageData, 0, 0);
+
+                // ✨ PREMIUM SPECULAR HIGHLIGHTS - Multiple layers for photorealism
+                // Main specular (brightest, sharp)
+                const mainSpec = ctx.createRadialGradient(centerX * 0.68, centerY * 0.55, 0, centerX * 0.68, centerY * 0.55, radius * 0.42);
+                mainSpec.addColorStop(0, 'rgba(255, 255, 255, 1)');
+                mainSpec.addColorStop(0.1, 'rgba(255, 255, 255, 1)');
+                mainSpec.addColorStop(0.25, 'rgba(255, 255, 255, 0.95)');
+                mainSpec.addColorStop(0.5, 'rgba(255, 255, 255, 0.5)');
+                mainSpec.addColorStop(0.75, 'rgba(255, 255, 255, 0.15)');
+                mainSpec.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                ctx.fillStyle = mainSpec;
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
                 ctx.beginPath();
-                ctx.arc(s * 0.27, s * 0.2, s * 0.35, 0, Math.PI * 2);
+                ctx.arc(centerX * 0.68, centerY * 0.55, radius * 0.42, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                // Secondary specular highlights (smaller, softer)
+                for (let i = 0; i < 5; i++) {
+                    const angle = (i / 5) * Math.PI * 2 + Math.PI / 4;
+                    const dist = radius * (0.6 + i * 0.05);
+                    const hx = centerX + Math.cos(angle) * dist * 0.7;
+                    const hy = centerY + Math.sin(angle) * dist * 0.7;
+                    const hr = radius * (0.08 + i * 0.02);
+
+                    const secSpec = ctx.createRadialGradient(hx, hy, 0, hx, hy, hr);
+                    secSpec.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
+                    secSpec.addColorStop(0.5, 'rgba(255, 255, 255, 0.25)');
+                    secSpec.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                    ctx.fillStyle = secSpec;
+                    ctx.beginPath();
+                    ctx.arc(hx, hy, hr, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                // 🌈 ADVANCED RIM LIGHTING - Fresnel effect with color
+                const rimGrad1 = ctx.createRadialGradient(centerX, centerY, radius * 0.75, centerX, centerY, radius);
+                rimGrad1.addColorStop(0, 'rgba(255, 255, 255, 0)');
+                rimGrad1.addColorStop(0.7, 'rgba(255, 255, 255, 0)');
+                rimGrad1.addColorStop(0.85, colors[0] + 'dd');
+                rimGrad1.addColorStop(0.95, colors[1] + 'aa');
+                rimGrad1.addColorStop(1, 'rgba(255, 255, 255, 0.3)');
+                ctx.fillStyle = rimGrad1;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Secondary highlights
+                // Outer rim glow
+                const rimGrad2 = ctx.createRadialGradient(centerX, centerY, radius * 0.92, centerX, centerY, radius * 1.08);
+                rimGrad2.addColorStop(0, 'rgba(255, 255, 255, 0)');
+                rimGrad2.addColorStop(0.3, colors[0] + '66');
+                rimGrad2.addColorStop(0.7, colors[1] + '44');
+                rimGrad2.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                ctx.globalCompositeOperation = 'screen';
+                ctx.fillStyle = rimGrad2;
                 ctx.beginPath();
-                ctx.ellipse(s * 0.72, s * 0.68, s * 0.15, s * 0.1, Math.PI / 4, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+                ctx.arc(centerX, centerY, radius * 1.08, 0, Math.PI * 2);
                 ctx.fill();
+                ctx.globalCompositeOperation = 'source-over';
 
+                // 💎 ULTRA GLOSS - Wet surface reflection
+                ctx.save();
                 ctx.beginPath();
-                ctx.ellipse(s * 0.65, s * 0.38, s * 0.08, s * 0.05, -Math.PI / 6, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+                ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                ctx.clip();
+
+                ctx.globalCompositeOperation = 'overlay';
+                ctx.beginPath();
+                ctx.ellipse(centerX * 0.75, centerY * 0.65, radius * 0.5, radius * 0.32, -0.5, 0, Math.PI * 2);
+                const gloss1 = ctx.createRadialGradient(centerX * 0.75, centerY * 0.65, 0, centerX * 0.75, centerY * 0.65, radius * 0.5);
+                gloss1.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+                gloss1.addColorStop(0.3, 'rgba(255, 255, 255, 0.6)');
+                gloss1.addColorStop(0.6, 'rgba(255, 255, 255, 0.2)');
+                gloss1.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                ctx.fillStyle = gloss1;
                 ctx.fill();
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.restore();
 
-                // Rim light (normal mapping simulation)
-                const rimGradient = ctx.createRadialGradient(s / 2, s / 2, s * 0.35, s / 2, s / 2, s * 0.5);
-                rimGradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
-                rimGradient.addColorStop(0.82, 'rgba(255, 255, 255, 0)');
-                rimGradient.addColorStop(0.92, `${colors[0]}aa`);
-                rimGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-                ctx.fillStyle = rimGradient;
-                ctx.beginPath();
-                ctx.arc(s / 2, s / 2, s / 2 - 3, 0, Math.PI * 2);
-                ctx.fill();
+                // 🔲 CHROMATIC ABERRATION on edges
+                ctx.save();
+                ctx.globalCompositeOperation = 'screen';
+                ctx.globalAlpha = 0.15;
 
-                // Gloss overlay (wet surface effect)
+                // Red channel shift
+                ctx.strokeStyle = '#ff0000';
+                ctx.lineWidth = 1.5;
                 ctx.beginPath();
-                ctx.ellipse(s * 0.32, s * 0.25, s * 0.25, s * 0.16, -0.4, 0, Math.PI * 2);
-                const glossGradient = ctx.createRadialGradient(s * 0.32, s * 0.25, 0, s * 0.32, s * 0.25, s * 0.25);
-                glossGradient.addColorStop(0, 'rgba(255, 255, 255, 0.7)');
-                glossGradient.addColorStop(0.4, 'rgba(255, 255, 255, 0.3)');
-                glossGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-                ctx.fillStyle = glossGradient;
-                ctx.fill();
+                ctx.arc(centerX + 1, centerY, radius - 2, 0, Math.PI * 2);
+                ctx.stroke();
 
-                // Fresnel effect (edge highlight)
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-                ctx.lineWidth = 2;
+                // Blue channel shift
+                ctx.strokeStyle = '#0000ff';
                 ctx.beginPath();
-                ctx.arc(s / 2, s / 2, s / 2 - 4, 0, Math.PI * 2);
+                ctx.arc(centerX - 1, centerY, radius - 2, 0, Math.PI * 2);
+                ctx.stroke();
+
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.globalAlpha = 1;
+                ctx.restore();
+
+                // Final edge definition
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius - 1, 0, Math.PI * 2);
                 ctx.stroke();
 
                 return canvas;
@@ -1537,55 +1706,116 @@
                     const h = wall.h * CFG.CELL_SIZE;
                     const drawY = CFG.HEIGHT - (y - camOffset.y);
 
-                    // 3D LAYERED WALL - Multiple depth layers
-                    const depthOffset = 8;
-                    const numLayers = 3;
+                    // 🧱 ULTRA PREMIUM TEXTURED WALLS - Photorealistic brick/concrete
+                    const depthOffset = 12; // Increased depth
+                    const numLayers = 4; // More layers for better 3D
 
                     // Shadow/depth layers (drawn back to front)
                     for (let i = numLayers - 1; i >= 0; i--) {
                         const layerDepth = i * depthOffset;
-                        const layerAlpha = 0.3 + (i / numLayers) * 0.7;
+                        const layerAlpha = 0.2 + (i / (numLayers - 1)) * 0.8;
 
                         ctx.save();
                         ctx.globalAlpha = layerAlpha;
 
-                        // Layer shadow
+                        const wallX = x - w / 2 + 5 + layerDepth;
+                        const wallY = drawY - h + 5 + layerDepth;
+                        const wallW = w - 10;
+                        const wallH = h - 10;
+
+                        // Layer shadow (deeper shadow for back layers)
                         if (i > 0) {
-                            ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+                            const shadowGrad = ctx.createLinearGradient(wallX, wallY, wallX + wallW, wallY + wallH);
+                            shadowGrad.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
+                            shadowGrad.addColorStop(0.5, 'rgba(0, 0, 0, 0.4)');
+                            shadowGrad.addColorStop(1, 'rgba(0, 0, 0, 0.3)');
+                            ctx.fillStyle = shadowGrad;
                             ctx.beginPath();
-                            ctx.roundRect(
-                                x - w / 2 + 5 + layerDepth,
-                                drawY - h + 5 + layerDepth,
-                                w - 10,
-                                h - 10,
-                                10
-                            );
+                            ctx.roundRect(wallX, wallY, wallW, wallH, 12);
                             ctx.fill();
                         }
 
-                        // Main wall gradient
-                        const wallGradient = ctx.createLinearGradient(
-                            x, drawY - h + layerDepth,
-                            x, drawY + layerDepth
-                        );
-                        wallGradient.addColorStop(0, CFG.COLORS.WALL[2]);
-                        wallGradient.addColorStop(0.3, CFG.COLORS.WALL[1]);
-                        wallGradient.addColorStop(0.6, CFG.COLORS.WALL[0]);
-                        wallGradient.addColorStop(1, CFG.COLORS.WALL[1]);
+                        // 🎨 PREMIUM GRADIENT with better color transition
+                        const wallGradient = ctx.createLinearGradient(wallX, wallY, wallX, wallY + wallH);
+                        wallGradient.addColorStop(0, CFG.COLORS.WALL[2]); // Dark top
+                        wallGradient.addColorStop(0.15, CFG.COLORS.WALL[1]); // Mid
+                        wallGradient.addColorStop(0.4, CFG.COLORS.WALL[0]); // Bright middle
+                        wallGradient.addColorStop(0.7, CFG.COLORS.WALL[1]); // Mid
+                        wallGradient.addColorStop(1, CFG.COLORS.WALL[2]); // Dark bottom
 
                         ctx.fillStyle = wallGradient;
-                        ctx.shadowBlur = i === 0 ? 15 : 0;
-                        ctx.shadowColor = 'rgba(255, 51, 102, 0.8)';
+                        ctx.shadowBlur = i === 0 ? 25 : 0;
+                        ctx.shadowColor = 'rgba(255, 51, 102, 0.9)';
                         ctx.beginPath();
-                        ctx.roundRect(
-                            x - w / 2 + 5 + layerDepth,
-                            drawY - h + 5 + layerDepth,
-                            w - 10,
-                            h - 10,
-                            10
-                        );
+                        ctx.roundRect(wallX, wallY, wallW, wallH, 12);
                         ctx.fill();
                         ctx.shadowBlur = 0;
+
+                        // 🧱 BRICK/CONCRETE TEXTURE (only on front layer for performance)
+                        if (i === 0) {
+                            // Create temporary canvas for texture
+                            const texCanvas = document.createElement('canvas');
+                            texCanvas.width = wallW;
+                            texCanvas.height = wallH;
+                            const texCtx = texCanvas.getContext('2d');
+
+                            // Generate procedural brick/concrete texture
+                            const texData = texCtx.createImageData(wallW, wallH);
+                            const pixels = texData.data;
+
+                            for (let py = 0; py < wallH; py++) {
+                                for (let px = 0; px < wallW; px++) {
+                                    const idx = (py * wallW + px) * 4;
+
+                                    // Fractal noise for concrete texture
+                                    const noise = TextureGen.fractalNoise(
+                                        (wallX + px) / 50,
+                                        (wallY + py) / 50,
+                                        4, 0.5, 3, wall.x * 17 + wall.y * 31
+                                    );
+
+                                    // Brick pattern
+                                    const brickHeight = 20;
+                                    const brickWidth = 45;
+                                    const mortarSize = 3;
+
+                                    const row = Math.floor(py / brickHeight);
+                                    const col = Math.floor((px + (row % 2) * (brickWidth / 2)) / brickWidth);
+
+                                    const brickX = px % brickWidth;
+                                    const brickY = py % brickHeight;
+
+                                    // Mortar lines (darker)
+                                    const isMortar = brickX < mortarSize || brickY < mortarSize;
+
+                                    // Texture intensity (darker in mortar, varied in brick)
+                                    let textureValue = isMortar ?
+                                        -40 + noise * 20 :
+                                        (noise - 0.5) * 60;
+
+                                    // Edge wear/damage
+                                    const edgeNoise = TextureGen.noise2D(px / 10, py / 10, wall.y * 13);
+                                    if ((brickX < 5 || brickY < 5) && edgeNoise > 0.7) {
+                                        textureValue -= 30; // Darker edges
+                                    }
+
+                                    // Apply texture to alpha channel (for overlay)
+                                    pixels[idx] = 0;
+                                    pixels[idx + 1] = 0;
+                                    pixels[idx + 2] = 0;
+                                    pixels[idx + 3] = Math.abs(textureValue);
+                                }
+                            }
+
+                            texCtx.putImageData(texData, 0, 0);
+
+                            // Apply texture overlay
+                            ctx.globalCompositeOperation = 'overlay';
+                            ctx.globalAlpha = 0.4;
+                            ctx.drawImage(texCanvas, wallX, wallY);
+                            ctx.globalCompositeOperation = 'source-over';
+                            ctx.globalAlpha = layerAlpha;
+                        }
 
                         // Top highlight (3D edge)
                         if (i === 0) {
