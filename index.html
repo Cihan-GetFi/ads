@@ -1100,7 +1100,7 @@
         const Player = {
             gridX: 4,
             gridY: 3,
-            direction: { x: 0, y: -1 }, // CHANGED: Start moving DOWN
+            direction: { x: 0, y: 0 }, // FIX: Start STATIONARY - only move on swipe
             rotation: 0, // NEW: Rolling animation
             scale: 1,
             squashTime: 0,
@@ -1111,7 +1111,7 @@
             init() {
                 this.gridX = CFG.PLAYER_START.x;
                 this.gridY = CFG.PLAYER_START.y;
-                this.direction = { x: 0, y: -1 }; // CHANGED: Move down by default
+                this.direction = { x: 0, y: 0 }; // FIX: Start stationary
                 this.rotation = 0;
                 this.scale = 1;
                 this.trailTimer = 0;
@@ -1174,10 +1174,10 @@
                 // Clamp X position
                 this.gridX = Math.max(0.5, Math.min(CFG.GRID_WIDTH - 0.5, this.gridX));
 
-                // 🚨 CRITICAL: Clamp Y position to keep player on screen
-                // Player must stay within visible camera range
-                const minY = Camera.y - 3;  // Player can be slightly above camera center
-                const maxY = Camera.y + 10; // Player can be below camera center
+                // 🚨 FIX: Keep player centered on screen
+                // Player stays in middle area, camera scrolls around it
+                const minY = Camera.y - 2;  // Player can be slightly above camera
+                const maxY = Camera.y + 2;  // Player can be slightly below camera
                 this.gridY = Math.max(minY, Math.min(maxY, this.gridY));
 
                 // 🎾 ROLLING ANIMATION - Ball rotates as it moves
