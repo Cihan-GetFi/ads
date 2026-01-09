@@ -412,7 +412,7 @@
             CELL_SIZE: 80,
             GRID_WIDTH: 9,
             PLAYER_START: { x: 4, y: 3 },
-            PLAYER_SPEED: 2.0, // SLOW & CONTROLLABLE: Much slower for precision
+            PLAYER_SPEED: 1.0, // ULTRA SLOW: Reduced to 1.0 for real control
             CAMERA_SPEED: 3.5,
             SWIPE_THRESHOLD: 25,
             GAME_DURATION: 15000,
@@ -1220,7 +1220,7 @@
                     this.direction.x * this.direction.x +
                     this.direction.y * this.direction.y
                 ) * speed;
-                this.rotation += moveSpeed * 8; // Rotation speed based on movement
+                this.rotation += moveSpeed * 4; // Slower rotation to match slower movement
 
                 if (this.squashTime > 0) {
                     this.squashTime = Math.max(0, this.squashTime - dt);
