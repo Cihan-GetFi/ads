@@ -28,10 +28,6 @@
         }
         #c {
             display: block;
-            max-width: 100%;
-            max-height: 100%;
-            width: auto;
-            height: auto;
             image-rendering: -webkit-optimize-contrast;
             image-rendering: crisp-edges;
         }
@@ -1068,10 +1064,16 @@
                     if (!wall.active) return;
 
                     const pr = CFG.PLAYER_RADIUS;
-                    if (px + pr > wall.x &&
-                        px - pr < wall.x + wall.w &&
-                        py + pr > wall.y &&
-                        py - pr < wall.y + wall.h) {
+                    // Walls are centered on their X coordinate, so adjust collision bounds
+                    const wallLeft = wall.x - wall.w / 2;
+                    const wallRight = wall.x + wall.w / 2;
+                    const wallTop = wall.y;
+                    const wallBottom = wall.y + wall.h;
+
+                    if (px + pr > wallLeft &&
+                        px - pr < wallRight &&
+                        py + pr > wallTop &&
+                        py - pr < wallBottom) {
                         this.hitWall();
                     }
                 });
