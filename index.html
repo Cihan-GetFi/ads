@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <meta name="ad.size" content="width=320,height=480">
-    <title>G-Roll - Ultra Premium Edition</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>G-Roll - Ultra Premium Edition v7.0 [EXTREME SLOW]</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body {
@@ -1201,6 +1204,19 @@
                 if (Game.state !== 'playing') return;
 
                 const speed = CFG.PLAYER_SPEED * dt;
+
+                // DEBUG: Log actual values
+                if (Math.random() < 0.01) { // Log 1% of frames to avoid spam
+                    console.log('🔍 SPEED DEBUG:', {
+                        'CFG.PLAYER_SPEED': CFG.PLAYER_SPEED,
+                        'dt': dt.toFixed(4),
+                        'speed': speed.toFixed(4),
+                        'direction': this.direction,
+                        'gridX': this.gridX.toFixed(2),
+                        'gridY': this.gridY.toFixed(2)
+                    });
+                }
+
                 this.gridX += this.direction.x * speed;
                 this.gridY += this.direction.y * speed;
 
